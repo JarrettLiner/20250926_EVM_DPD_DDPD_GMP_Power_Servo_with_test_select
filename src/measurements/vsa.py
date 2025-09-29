@@ -12,6 +12,7 @@
 #     - Power Servo controls:
 #         * External NRX (via PowerServo)
 #         * K18 internal VSA-based servo
+#     - Envelope Tracking (ET) integration
 # ==============================================================
 
 import logging
@@ -92,18 +93,19 @@ class VSA:
 
             # Start instrument connection
             self.instr = self.bench.VSA_start()
-            self.instr.query('*RST; *OPC?')   # Reset analyzer
+            self.instr.query('*RST; *OPC?')  # Reset analyzer
             self.instr.query('*OPC?')
 
             # Load selected memory setup file
             self.instr.query(fr'MMEM:LOAD:STAT 1,"{setup_file}"; *OPC?')
-            self.instr.query('CONF:NR5G:DL:CC1:RFUC:STAT OFF; *OPC?') # Disable RFU correction
-            self.instr.query(f':SENS:SWE:TIME {0.0101}; *OPC?')  # Set sweep time to minimum (10.1ms) to speed up measurements
-            self.instr.query('INIT:CONT OFF; *OPC?') # Single trigger mode
-            self.instr.query('INIT:IMM; *OPC?') # Trigger single measurement
+            self.instr.query('CONF:NR5G:DL:CC1:RFUC:STAT OFF; *OPC?')  # Disable RFU correction
+            self.instr.query(
+                f':SENS:SWE:TIME {0.0101}; *OPC?')  # Set sweep time to minimum (10.1ms) to speed up measurements
+            self.instr.query('INIT:CONT OFF; *OPC?')  # Single trigger mode
+            self.instr.query('INIT:IMM; *OPC?')  # Trigger single measurement
 
             # Amplifier/K18 setup
-            self.write_command_opc('INST:SEL "Amplifier"') # Select Amplifier application
+            self.write_command_opc('INST:SEL "Amplifier"')  # Select Amplifier application
             self.instr.query('CONF:GEN:CONN:STAT ON; *OPC?')
             self.instr.query('CONF:GEN:CONT:STAT ON; *OPC?')
             self.instr.query('CONF:SETT; *OPC?')
@@ -122,8 +124,10 @@ class VSA:
             print(f"Total VSA setup time: {self.setup_time:.3f}")
             vsa_setup_time = time() - vsa_setup_start
             print("vsa initialization time, , , , {:.3f}".format(vsa_setup_time))
-            print("This includes reset\nretieveing the setup parameters\nfrom the test_input file\nand loading of the setup file\nupdate the poly DPD calculation\nnot included in the total test time")
-            logger.info(f"VSA initialized in {self.setup_time:.3f}s using signal_bandwidth '{signal_bandwidth}' and frame_type '{frame_type}'")
+            print(
+                "This includes reset\nretieveing the setup parameters\nfrom the test_input file\nand loading of the setup file\nupdate the poly DPD calculation\nnot included in the total test time")
+            logger.info(
+                f"VSA initialized in {self.setup_time:.3f}s using signal_bandwidth '{signal_bandwidth}' and frame_type '{frame_type}'")
 
         except Exception as e:
             logger.error(f"VSA initialization failed: {str(e)}")
@@ -150,6 +154,7 @@ class VSA:
             raise
 
     def get_evm(self):
+        """Fetch EVM value from the VSA."""
         try:
             get_evm_start = time()
             evm_value = float(self.instr.query('FETC:CC1:ISRC:FRAM:SUMM:EVM:ALL:AVERage?'))
@@ -178,33 +183,64 @@ class VSA:
             raise
 
     def _resolve_servo_flags(self, use_power_servo, use_k18_power_servo):
+        """Resolve servo flags to defaults if None."""
         if use_power_servo is None:
             use_power_servo = USE_POWER_SERVO
         if use_k18_power_servo is None:
             use_k18_power_servo = USE_K18_POWER_SERVO
         return use_power_servo, use_k18_power_servo
 
-    def _run_servos(self, power_servo, freq_ghz, target_output, expected_gain, servo_iterations, use_power_servo, use_k18_power_servo):
+    def _run_servos(self, power_servo, freq_ghz, target_output, expected_gain, servo_iterations, use_power_servo,
+                    use_k18_power_servo):
+        """Execute power servos (external NRX and/or K18)."""
         servo_loops = 0
         ext_servo_time = 0
         k18_time = 0
+
         if use_power_servo:
             ext_servo_start = time()
-            servo_loops = power_servo.external_servo(freq_ghz, target_output, expected_gain, servo_iterations)
+            servo_loops, _ = power_servo.external_servo(freq_ghz, target_output, expected_gain, servo_iterations)
             ext_servo_time = time() - ext_servo_start
             print(f"External servo time, , {ext_servo_time:.3f}s")
+
         if use_k18_power_servo:
             k18_start = time()
-            k18_loops = power_servo.k18_servo(target_output, servo_iterations)
+            k18_loops, _ = power_servo.k18_servo(target_output, servo_iterations)
             k18_time = time() - k18_start
             print(f"K18 servo time, , {k18_time:.3f}s")
-            servo_loops += k18_loops  # Accumulate if both
+            if use_power_servo:
+                servo_loops += k18_loops  # Accumulate if both servos used
+            else:
+                servo_loops = k18_loops
+
         return servo_loops, ext_servo_time, k18_time
+
+    def _perform_et_sweep(self, et):
+        """Perform envelope tracking delay sweep if ET is enabled."""
+        if not et:
+            return None
+
+        et_start = time()
+        self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')  # Ensure back to EVM mode
+        et.configure()  # Configure ET (timing printed inside)
+
+        et_starting_delay = test_config.get("Sweep_Measurement", {}).get("et_starting_delay", 0.0)
+        et_delay_step = test_config.get("Sweep_Measurement", {}).get("et_delay_step", 0.0)
+
+        et_delays, et_evms, et_step_times, et_total_loop_time = et.et_delay_evm(et_starting_delay, et_delay_step)
+        et_total_time = time() - et_start
+
+        return {
+            "delays": et_delays,
+            "evms": et_evms,
+            "total_time": et_total_time
+        }
 
     # ----------------------------------------------------------
     # Baseline EVM Measurement
     # ----------------------------------------------------------
-    def measure_evm(self, freq_str, vsa_offset, target_output, servo_iterations, freq_ghz, expected_gain, power_servo, USE_POWER_SERVO=None, USE_K18_POWER_SERVO=None, et=None):
+    def measure_evm(self, freq_str, vsa_offset, target_output, servo_iterations, freq_ghz,
+                    expected_gain, power_servo, use_power_servo=None, use_k18_power_servo=None, et=None):
         """Measure baseline EVM and ACLR (no DPD)."""
         try:
             total_evm_start = time()
@@ -213,10 +249,11 @@ class VSA:
 
             # Run servos
             power_servo_start = time()
-            use_power_servo, use_k18_power_servo = self._resolve_servo_flags(USE_POWER_SERVO, USE_K18_POWER_SERVO)
-            servo_loops, ext_servo_time, k18_time = self._run_servos(power_servo, freq_ghz, target_output,
-                                                                     expected_gain, servo_iterations,
-                                                                     use_power_servo, use_k18_power_servo)
+            use_power_servo, use_k18_power_servo = self._resolve_servo_flags(use_power_servo, use_k18_power_servo)
+            servo_loops, ext_servo_time, k18_time = self._run_servos(
+                power_servo, freq_ghz, target_output, expected_gain, servo_iterations,
+                use_power_servo, use_k18_power_servo
+            )
             power_servo_time = time() - power_servo_start
             print(f"Servo loop time, , {power_servo_time:.3f}s")
             print(f"use nrx {use_power_servo}, use K18 {use_k18_power_servo}, servo iterations {servo_loops}")
@@ -241,22 +278,17 @@ class VSA:
             print("This includes VSA ACLR measurement")
 
             # Envelope Tracking if enabled
-            baseline_et_data = None
-            if et:
-                et_start = time()
-                self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')  # Ensure back to EVM mode
-                et.configure()  # Configure ET (timing printed inside)
-                et_delays, et_evms, et_step_times, et_total_loop_time = et.et_delay_evm(test_config["Sweep_Measurement"].get("et_starting_delay", 0.0),
-                                                                                        test_config["Sweep_Measurement"].get("et_delay_step", 0.0))
-                et_total_time = time() - et_start
-                print(f"Baseline ET total time (incl. config), , {et_total_time:.3f}s")
-                baseline_et_data = {"delays": et_delays, "evms": et_evms, "total_time": et_total_time}
+            baseline_et_data = self._perform_et_sweep(et)
+            if baseline_et_data:
+                print(f"Baseline ET total time (incl. config), , {baseline_et_data['total_time']:.3f}s")
 
             total_evm_time = time() - total_evm_start
             print(f"Total baseline evm time, , {total_evm_time:.3f}s")
             print("This includes power servo EVM and ACLR measurements")
             logger.info(f"Baseline done: Power={vsa_power}, EVM={evm_value}, Total={total_evm_time:.3f}s")
-            return (vsa_power, evm_value, evm_time, chan_pow, adj_chan_lower, adj_chan_upper, aclr_time, total_evm_time, servo_loops, ext_servo_time, k18_time, baseline_et_data)
+
+            return (vsa_power, evm_value, evm_time, chan_pow, adj_chan_lower, adj_chan_upper,
+                    aclr_time, total_evm_time, servo_loops, ext_servo_time, k18_time, baseline_et_data)
 
         except Exception as e:
             logger.error(f"Baseline EVM failed: {str(e)}")
@@ -265,10 +297,14 @@ class VSA:
     # ----------------------------------------------------------
     # Polynomial DPD (formerly Single DPD)
     # ----------------------------------------------------------
-    def perform_polynomial_dpd(self, freq_str, vsa_offset, target_output, servo_iterations, freq_ghz, expected_gain, power_servo, USE_POWER_SERVO=None, USE_K18_POWER_SERVO=None, et=None):
+    def perform_polynomial_dpd(self, freq_str, vsa_offset, target_output, servo_iterations,
+                               freq_ghz, expected_gain, power_servo, use_power_servo=None,
+                               use_k18_power_servo=None, et=None):
         """Run Polynomial DPD + measurement."""
         try:
             poly_total_start = time()
+
+            # Amplifier app setup
             amp_setup_start = time()
             self.write_command_opc('INST:SEL "Amplifier"')
             self.instr.query('CONF:GEN:CONN:STAT ON; *OPC?')
@@ -278,6 +314,7 @@ class VSA:
             amp_app_setup_time = time() - amp_setup_start
             print(f"amp app setup time, , {amp_app_setup_time:.3f}s")
 
+            # Polynomial DPD setup and calculation
             poly_setup_start = time()
             self.instr.query('CONF:DPD:SHAP:MODE POLY; *OPC?')
             self.instr.query('CONF:DPD:UPD; *OPC?')
@@ -285,15 +322,18 @@ class VSA:
             print(f"Polynomial DPD setup time, , {poly_setup_time:.3f}s")
             print("This includes amplifier app setup poly DPD calculation and update")
 
+            # Power servo
             poly_power_servo_start = time()
-            use_power_servo, use_k18_power_servo = self._resolve_servo_flags(USE_POWER_SERVO, USE_K18_POWER_SERVO)
-            poly_servo_loops, poly_ext_servo_time, poly_k18_time = self._run_servos(power_servo, freq_ghz, target_output,
-                                                                                    expected_gain, servo_iterations,
-                                                                                    use_power_servo, use_k18_power_servo)
+            use_power_servo, use_k18_power_servo = self._resolve_servo_flags(use_power_servo, use_k18_power_servo)
+            poly_servo_loops, poly_ext_servo_time, poly_k18_time = self._run_servos(
+                power_servo, freq_ghz, target_output, expected_gain, servo_iterations,
+                use_power_servo, use_k18_power_servo
+            )
             poly_power_servo_time = time() - poly_power_servo_start
             print(f"Polynomial DPD Servo loop time, , {poly_power_servo_time:.3f}s")
             print(f"use nrx {use_power_servo}, use K18 {use_k18_power_servo}, servo iterations {poly_servo_loops}")
 
+            # EVM measurement
             evm_start = time()
             self.instr.query('INST:SEL "5G NR"; *OPC?')
             self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')
@@ -304,6 +344,7 @@ class VSA:
             print(f"Polynomial DPD EVM and VSA Power time, , {poly_time:.3f}s")
             print("This includes VSA power and EVM measurement after polynomial DPD applied")
 
+            # ACLR measurement
             aclr_start = time()
             self.instr.write('CONF:NR5G:MEAS ACLR')
             self.instr.write('INIT:IMM;*WAI')
@@ -314,22 +355,18 @@ class VSA:
             print("This includes VSA ACLR measurement after polynomial DPD applied and power servo")
 
             # Envelope Tracking if enabled
-            poly_et_data = None
-            if et:
-                et_start = time()
-                self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')  # Ensure back to EVM mode
-                et.configure()  # Configure ET (timing printed inside)
-                et_delays, et_evms, et_step_times, et_total_loop_time = et.et_delay_evm(test_config["Sweep_Measurement"].get("et_starting_delay", 0.0),
-                                                                                        test_config["Sweep_Measurement"].get("et_delay_step", 0.0))
-                et_total_time = time() - et_start
-                print(f"Polynomial DPD ET total time (incl. config), , {et_total_time:.3f}s")
-                poly_et_data = {"delays": et_delays, "evms": et_evms, "total_time": et_total_time}
+            poly_et_data = self._perform_et_sweep(et)
+            if poly_et_data:
+                print(f"Polynomial DPD ET total time (incl. config), , {poly_et_data['total_time']:.3f}s")
 
             poly_total_time = time() - poly_total_start
             print(f"Polynomial dpd evm time, , {poly_total_time:.3f}s")
             print("This includes amplifier app setup poly DPD calculation power servo EVM and ACLR measurements")
             logger.info(f"Polynomial DPD done: Power={poly_power}, EVM={poly_evm}, Total={poly_total_time:.3f}s")
-            return (poly_power, poly_evm, poly_time, poly_chan_pow, poly_adj_chan_lower, poly_adj_chan_upper, poly_aclr_time, poly_total_time, poly_servo_loops, poly_ext_servo_time, poly_k18_time, poly_et_data)
+
+            return (poly_power, poly_evm, poly_time, poly_chan_pow, poly_adj_chan_lower,
+                    poly_adj_chan_upper, poly_aclr_time, poly_total_time, poly_servo_loops,
+                    poly_ext_servo_time, poly_k18_time, poly_et_data)
 
         except Exception as e:
             logger.error(f"Polynomial DPD failed: {str(e)}")
@@ -338,10 +375,14 @@ class VSA:
     # ----------------------------------------------------------
     # Direct DPD (formerly Iterative DPD)
     # ----------------------------------------------------------
-    def perform_direct_dpd(self, freq_str, vsa_offset, target_output, ddpd_iterations, servo_iterations, freq_ghz, expected_gain, power_servo, USE_POWER_SERVO=None, USE_K18_POWER_SERVO=None, et=None):
+    def perform_direct_dpd(self, freq_str, vsa_offset, target_output, ddpd_iterations,
+                           servo_iterations, freq_ghz, expected_gain, power_servo,
+                           use_power_servo=None, use_k18_power_servo=None, et=None):
         """Run Direct DPD + measurement."""
         try:
             ddpd_total_start = time()
+
+            # Amplifier app setup
             amp_setup_start = time()
             self.write_command_opc('INST:SEL "Amplifier"')
             self.instr.query('CONF:GEN:CONN:STAT ON; *OPC?')
@@ -351,6 +392,7 @@ class VSA:
             amp_app_setup_time = time() - amp_setup_start
             print(f"amp app setup time, , {amp_app_setup_time:.3f}s")
 
+            # Direct DPD setup
             ddpd_setup_start = time()
             self.instr.query('CONF:DDPD:STAT ON; *OPC?')
             self.instr.query('CONF:DDPD:TRAD 100; *OPC?')
@@ -360,15 +402,18 @@ class VSA:
             print(f"direct DPD setup time, , {ddpd_setup_time:.3f}s")
             print(f"ddpd iterations: {ddpd_iterations}")
 
+            # Power servo
             ddpd_power_servo_start = time()
-            use_power_servo, use_k18_power_servo = self._resolve_servo_flags(USE_POWER_SERVO, USE_K18_POWER_SERVO)
-            servo_loops, ext_servo_time, k18_time = self._run_servos(power_servo, freq_ghz, target_output,
-                                                                     expected_gain, servo_iterations,
-                                                                     use_power_servo, use_k18_power_servo)
+            use_power_servo, use_k18_power_servo = self._resolve_servo_flags(use_power_servo, use_k18_power_servo)
+            servo_loops, ext_servo_time, k18_time = self._run_servos(
+                power_servo, freq_ghz, target_output, expected_gain, servo_iterations,
+                use_power_servo, use_k18_power_servo
+            )
             ddpd_power_servo_time = time() - ddpd_power_servo_start
             print(f"direct DPD Servo loop time, , {ddpd_power_servo_time:.3f}s")
             print(f"use nrx {use_power_servo}, use K18 {use_k18_power_servo}, servo iterations {servo_loops}")
 
+            # EVM measurement
             evm_start = time()
             self.instr.query('INST:SEL "5G NR"; *OPC?')
             self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')
@@ -379,6 +424,7 @@ class VSA:
             print(f"direct DPD EVM and VSA Power time, , {ddpd_evm_time:.3f}s")
             print("This includes VSA power and EVM measurement after direct DPD applied")
 
+            # ACLR measurement
             aclr_start = time()
             self.instr.write('CONF:NR5G:MEAS ACLR')
             self.instr.write('INIT:IMM;*WAI')
@@ -389,22 +435,16 @@ class VSA:
             print("This includes VSA ACLR measurement after direct DPD applied and power servo")
 
             # Envelope Tracking if enabled (before disabling DPD)
-            direct_et_data = None
-            if et:
-                et_start = time()
-                self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')  # Ensure back to EVM mode
-                et.configure()  # Configure ET (timing printed inside)
-                et_delays, et_evms, et_step_times, et_total_loop_time = et.et_delay_evm(test_config["Sweep_Measurement"].get("et_starting_delay", 0.0),
-                                                                                        test_config["Sweep_Measurement"].get("et_delay_step", 0.0))
-                et_total_time = time() - et_start
-                print(f"Direct DPD ET total time (incl. config), , {et_total_time:.3f}s")
-                direct_et_data = {"delays": et_delays, "evms": et_evms, "total_time": et_total_time}
+            direct_et_data = self._perform_et_sweep(et)
+            if direct_et_data:
+                print(f"Direct DPD ET total time (incl. config), , {direct_et_data['total_time']:.3f}s")
 
             ddpd_total_time = time() - ddpd_total_start
             print(f"direct dpd evm time, , {ddpd_total_time:.3f}s")
             print("This includes amplifier app setup iterative DPD setup power servo EVM and ACLR measurements")
             logger.info(f"Direct DPD done: Power={ddpd_power}, EVM={ddpd_evm}, Total={ddpd_total_time:.3f}s")
 
+            # Return to 5G NR and disable DPD
             return_to_5g_nr_start = time()
             self.instr.query(':INST:SEL "Amplifier"; *OPC?')
             self.instr.query(':CONF:DDPD:APPL:STAT OFF; *OPC?')
@@ -417,10 +457,9 @@ class VSA:
             print(f"Return to 5G NR app time, , {return_to_5g_nr_time:.3f}s")
             print("This includes restoring VSA to 5G NR app and disabling DPDs")
 
-            return (ddpd_power, ddpd_evm, ddpd_evm_time,
-                    ddpd_chan_pow, ddpd_adj_chan_lower, ddpd_adj_chan_upper,
-                    ddpd_aclr_time, ddpd_total_time,
-                    servo_loops, ext_servo_time, k18_time, direct_et_data)
+            return (ddpd_power, ddpd_evm, ddpd_evm_time, ddpd_chan_pow, ddpd_adj_chan_lower,
+                    ddpd_adj_chan_upper, ddpd_aclr_time, ddpd_total_time, servo_loops,
+                    ext_servo_time, k18_time, direct_et_data)
 
         except Exception as e:
             logger.error(f"Direct DPD failed: {str(e)}")
@@ -429,12 +468,14 @@ class VSA:
     # ----------------------------------------------------------
     # GMP DPD
     # ----------------------------------------------------------
-    def perform_gmp_dpd(self, freq_str, vsa_offset, target_output, ddpd_iterations, servo_iterations,
-                        freq_ghz, expected_gain, power_servo,
-                        USE_POWER_SERVO=None, USE_K18_POWER_SERVO=None, et=None):
+    def perform_gmp_dpd(self, freq_str, vsa_offset, target_output, ddpd_iterations,
+                        servo_iterations, freq_ghz, expected_gain, power_servo,
+                        use_power_servo=None, use_k18_power_servo=None, et=None):
         """Run GMP (Generalized Memory Polynomial) DPD + measurement."""
         try:
             total_start = time()
+
+            # Amplifier app setup
             amp_setup_start = time()
             self.instr.query('INST:SEL "Amplifier"; *OPC?')
             self.instr.query('CONF:GEN:CONN:STAT ON; *OPC?')
@@ -444,8 +485,8 @@ class VSA:
             amp_app_setup_time = time() - amp_setup_start
             print(f"amp app setup time, , {amp_app_setup_time:.3f}s")
 
+            # DDPD setup (base for GMP)
             gmp_setup_start = time()
-            # Select amplifier + run DDPD as base
             gmp_ddpd_setup_start = time()
             self.instr.query('CONF:DDPD:STAT ON; *OPC?')
             self.instr.query('CONF:DDPD:TRAD 100; *OPC?')
@@ -473,15 +514,18 @@ class VSA:
             print(f"GMP total setup time, , {gmp_setup_time:.3f}s")
             print("This includes amplifier app setup ddpd setup and gmp calc and sync to vsg")
 
+            # Power servo
             gmp_power_servo_start = time()
-            use_power_servo, use_k18_power_servo = self._resolve_servo_flags(USE_POWER_SERVO, USE_K18_POWER_SERVO)
-            gmp_servo_loops, gmp_ext_servo_time, gmp_k18_time = self._run_servos(power_servo, freq_ghz, target_output,
-                                                                                 expected_gain, servo_iterations,
-                                                                                 use_power_servo, use_k18_power_servo)
+            use_power_servo, use_k18_power_servo = self._resolve_servo_flags(use_power_servo, use_k18_power_servo)
+            gmp_servo_loops, gmp_ext_servo_time, gmp_k18_time = self._run_servos(
+                power_servo, freq_ghz, target_output, expected_gain, servo_iterations,
+                use_power_servo, use_k18_power_servo
+            )
             gmp_power_servo_time = time() - gmp_power_servo_start
             print(f"GMP DPD Servo loop time, , {gmp_power_servo_time:.3f}s")
             print(f"use nrx {use_power_servo}, use K18 {use_k18_power_servo}, servo iterations {gmp_servo_loops}")
 
+            # EVM measurement
             evm_start = time()
             self.instr.query('INST:SEL "5G NR"; *OPC?')
             self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')
@@ -492,6 +536,7 @@ class VSA:
             print(f"GMP DPD EVM and VSA Power time, , {gmp_evm_time:.3f}s")
             print(f"This includes VSA power and EVM measurement after GMP DPD applied")
 
+            # ACLR measurement
             aclr_start = time()
             self.instr.write('CONF:NR5G:MEAS ACLR')
             self.instr.write('INIT:IMM;*WAI')
@@ -502,22 +547,16 @@ class VSA:
             print("This includes VSA ACLR measurement after GMP DPD applied and power servo")
 
             # Envelope Tracking if enabled (before disabling DPD)
-            gmp_et_data = None
-            if et:
-                et_start = time()
-                self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')  # Ensure back to EVM mode
-                et.configure()  # Configure ET (timing printed inside)
-                et_delays, et_evms, et_step_times, et_total_loop_time = et.et_delay_evm(test_config["Sweep_Measurement"].get("et_starting_delay", 0.0),
-                                                                                        test_config["Sweep_Measurement"].get("et_delay_step", 0.0))
-                et_total_time = time() - et_start
-                print(f"GMP ET total time (incl. config), , {et_total_time:.3f}s")
-                gmp_et_data = {"delays": et_delays, "evms": et_evms, "total_time": et_total_time}
+            gmp_et_data = self._perform_et_sweep(et)
+            if gmp_et_data:
+                print(f"GMP ET total time (incl. config), , {gmp_et_data['total_time']:.3f}s")
 
             gmp_total_time = time() - total_start
             print("GMP DPD total time, , {:.3f}s".format(gmp_total_time))
             print("This includes amplifier app setup ddpd setup gmp calc and sync power servo evm and aclr")
             logger.info(f"GMP DPD done: Power={gmp_power}, EVM={gmp_evm}, Total={gmp_total_time:.3f}s")
 
+            # Return to 5G NR and disable DPD
             return_to_5g_nr_start = time()
             self.instr.query(':INST:SEL "Amplifier"; *OPC?')
             self.instr.query(':CONF:MDPD:WAV:SEL REF; *OPC?')
@@ -530,10 +569,9 @@ class VSA:
             print(f"Return to 5G NR app time, , {return_to_5g_nr_time:.3f}s")
             print("This includes restoring VSA to 5G NR app and disabling DPDs")
 
-            return (gmp_power, gmp_evm, gmp_evm_time,
-                    gmp_chan_pow, gmp_adj_chan_lower, gmp_adj_chan_upper,
-                    gmp_aclr_time, gmp_total_time,
-                    gmp_servo_loops, gmp_ext_servo_time, gmp_k18_time, gmp_et_data)
+            return (gmp_power, gmp_evm, gmp_evm_time, gmp_chan_pow, gmp_adj_chan_lower,
+                    gmp_adj_chan_upper, gmp_aclr_time, gmp_total_time, gmp_servo_loops,
+                    gmp_ext_servo_time, gmp_k18_time, gmp_et_data)
 
         except Exception as e:
             logger.error(f"GMP DPD failed: {str(e)}")
@@ -552,7 +590,9 @@ class VSA:
             raise
 
     def write_command_opc(self, command):
+        """Write command with OPC synchronization."""
         self.instr.query(f'{command}; *OPC?')
 
     def queryFloat(self, query):
+        """Query and return float value."""
         return float(self.instr.query(query))
