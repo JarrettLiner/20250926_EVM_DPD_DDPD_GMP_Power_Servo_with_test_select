@@ -46,7 +46,29 @@ This guide explains the valid options for parameters in `test_inputs.json`.
 - **Valid Options**:
   - `true`: Run GMP DPD.
   - `false`: Skip GMP DPD.
-- **Example**: `"enable_gmp_dpd": false`
+- **Example**: `"enable_gmp_dpd": false"`
+
+### enable_envelope_tracking
+- **Description**: Enables or disables Envelope Tracking measurements after each DPD/baseline measurement.
+- **Valid Options**:
+  - `true`: Run ET delay sweep.
+  - `false`: Skip ET.
+- **Example**: `"enable_envelope_tracking": true`
+
+### et_starting_delay
+- **Description**: Starting delay value for the ET sweep (in seconds, e.g., -10ns = -1e-8).
+- **Valid Options**: Floating point number.
+- **Example**: `"et_starting_delay": -1e-8`
+
+### et_delay_shifts
+- **Description**: Number of delay shifts to perform in the ET sweep (total measurements = shifts + 1).
+- **Valid Options**: Positive integer.
+- **Example**: `"et_delay_shifts": 10`
+
+### et_delay_step
+- **Description**: Step size for each delay shift in the ET sweep (in seconds).
+- **Valid Options**: Floating point number.
+- **Example**: `"et_delay_step": 1e-9`
 
 ## Notes
 - Ensure the `user_comment_mode` matches the combination of `signal_bandwidth` and power servo type (`use_power_servo` or `use_K18_power_servo` in `range`).

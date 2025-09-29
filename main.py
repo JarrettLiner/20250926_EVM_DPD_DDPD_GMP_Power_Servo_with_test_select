@@ -21,6 +21,7 @@ from src.measurements.vsg import VSG
 from src.measurements.vsa import VSA
 from src.measurements.power_meter import PowerMeter
 from src.measurements.power_servo import PowerServo
+from src.measurements.et import ET  # Import ET class for envelope tracking
 
 # --------------------------------------------------------------
 # Logging Setup
@@ -74,6 +75,12 @@ def run_sweep():
     enable_direct_dpd = sweep_measurement.get("enable_direct_dpd", True)
     enable_gmp_dpd = sweep_measurement.get("enable_gmp_dpd", True)
 
+    # Envelope Tracking enable and parameters
+    enable_et = sweep_measurement.get("enable_envelope_tracking", False)
+    et_start_delay = sweep_measurement.get("et_starting_delay", 0.0)
+    et_delay_shifts = sweep_measurement.get("et_delay_shifts", 0)
+    et_delay_step = sweep_measurement.get("et_delay_step", 0.0)
+
     # Construct comment key based on signal_bandwidth and user_comment_mode
     comment_key = f"{signal_bandwidth}_{user_comment_mode}"
     comment_lines = config.get("User_Comments", {}).get(comment_key, [])
@@ -118,6 +125,9 @@ def run_sweep():
     pm = PowerMeter()  # NRX power meter
     power_servo = PowerServo(vsg, pm, vsa, max_iterations=servo_iterations, tolerance=tolerance)
 
+    # Initialize ET if enabled
+    et = ET(vsg, et_delay_shifts=et_delay_shifts, vsa=vsa, pm=pm) if enable_et else None
+
     results = []
     matched_frequencies = []
 
@@ -156,21 +166,22 @@ def run_sweep():
             freq_str = f"{freq:.0f}"
 
             (vsa_power, evm_value, evm_time, chan_pow, adj_chan_lower, adj_chan_upper, aclr_time, total_evm_time, servo_loops,
-             ext_servo_time, k18_time) = (
-                vsa.measure_evm(freq_str, vsa_offset, target_output, servo_iterations, freq_ghz, expected_gain, power_servo)
+             ext_servo_time, k18_time, baseline_et_data) = vsa.measure_evm(
+                freq_str, vsa_offset, target_output, servo_iterations, freq_ghz, expected_gain, power_servo, et=et
             )
 
             # -------------------------
             # Polynomial DPD measurement (formerly Single DPD)
             # -------------------------
+            poly_et_data = None
             if enable_polynomial_dpd:
                 (poly_power, poly_evm, poly_time,
                  poly_chan_pow, poly_adj_chan_lower,
                  poly_adj_chan_upper, poly_aclr_time,
                  poly_total_time, poly_servo_loops,
-                 poly_ext_servo_time, poly_k18_time) = vsa.perform_polynomial_dpd(
+                 poly_ext_servo_time, poly_k18_time, poly_et_data) = vsa.perform_polynomial_dpd(
                     freq_str, vsa_offset, target_output, servo_iterations,
-                    freq_ghz, expected_gain, power_servo
+                    freq_ghz, expected_gain, power_servo, et=et
                 )
             else:
                 poly_power = poly_evm = poly_time = poly_chan_pow = poly_adj_chan_lower = poly_adj_chan_upper = None
@@ -179,14 +190,15 @@ def run_sweep():
             # -------------------------
             # Direct DPD measurement (formerly Iterative DPD)
             # -------------------------
+            direct_et_data = None
             if enable_direct_dpd:
                 vsg.configure(freq, target_output - expected_gain, vsg_offset)
                 (direct_power, direct_evm, direct_time,
                  direct_chan_pow, direct_adj_chan_lower, direct_adj_chan_upper,
                  direct_aclr_time, direct_total_time,
-                 direct_servo_loops, direct_ext_servo_time, direct_k18_time) = vsa.perform_direct_dpd(
+                 direct_servo_loops, direct_ext_servo_time, direct_k18_time, direct_et_data) = vsa.perform_direct_dpd(
                     freq_str, vsa_offset, target_output, ddpd_iterations,
-                    servo_iterations, freq_ghz, expected_gain, power_servo
+                    servo_iterations, freq_ghz, expected_gain, power_servo, et=et
                 )
             else:
                 direct_power = direct_evm = direct_time = direct_chan_pow = direct_adj_chan_lower = direct_adj_chan_upper = None
@@ -195,14 +207,15 @@ def run_sweep():
             # -------------------------
             # GMP DPD measurement
             # -------------------------
+            gmp_et_data = None
             if enable_gmp_dpd:
                 vsg.configure(freq, target_output - expected_gain, vsg_offset)
                 (gmp_power, gmp_evm, gmp_time,
                  gmp_chan_pow, gmp_adj_chan_lower, gmp_adj_chan_upper,
                  gmp_aclr_time, gmp_total_time,
-                 gmp_servo_loops, gmp_ext_servo_time, gmp_k18_time) = vsa.perform_gmp_dpd(
+                 gmp_servo_loops, gmp_ext_servo_time, gmp_k18_time, gmp_et_data) = vsa.perform_gmp_dpd(
                     freq_str, vsa_offset, target_output, ddpd_iterations,
-                    servo_iterations, freq_ghz, expected_gain, power_servo
+                    servo_iterations, freq_ghz, expected_gain, power_servo, et=et
                 )
             else:
                 gmp_power = gmp_evm = gmp_time = gmp_chan_pow = gmp_adj_chan_lower = gmp_adj_chan_upper = None
@@ -279,6 +292,36 @@ def run_sweep():
                 "Total Elapsed Time (s)": round(elapsed, 3),
                 "Comment": user_comment
             }
+
+            # Add ET configuration parameters
+            if enable_et:
+                result["ET Starting Delay (s)"] = et_start_delay
+                result["ET Delay Step (s)"] = et_delay_step
+                result["ET Number of Shifts"] = et_delay_shifts
+
+                # Add baseline ET data
+                if baseline_et_data:
+                    result["Baseline ET Delays (s)"] = ", ".join(f"{d:.2e}" for d in baseline_et_data["delays"])
+                    result["Baseline ET EVMs (dB)"] = ", ".join(f"{e:.2f}" for e in baseline_et_data["evms"])
+                    result["Baseline ET Total Time (s)"] = round(baseline_et_data["total_time"], 3)
+
+                # Add polynomial DPD ET data
+                if poly_et_data:
+                    result["Polynomial DPD ET Delays (s)"] = ", ".join(f"{d:.2e}" for d in poly_et_data["delays"])
+                    result["Polynomial DPD ET EVMs (dB)"] = ", ".join(f"{e:.2f}" for e in poly_et_data["evms"])
+                    result["Polynomial DPD ET Total Time (s)"] = round(poly_et_data["total_time"], 3)
+
+                # Add direct DPD ET data
+                if direct_et_data:
+                    result["Direct DPD ET Delays (s)"] = ", ".join(f"{d:.2e}" for d in direct_et_data["delays"])
+                    result["Direct DPD ET EVMs (dB)"] = ", ".join(f"{e:.2f}" for e in direct_et_data["evms"])
+                    result["Direct DPD ET Total Time (s)"] = round(direct_et_data["total_time"], 3)
+
+                # Add GMP ET data
+                if gmp_et_data:
+                    result["GMP ET Delays (s)"] = ", ".join(f"{d:.2e}" for d in gmp_et_data["delays"])
+                    result["GMP ET EVMs (dB)"] = ", ".join(f"{e:.2f}" for e in gmp_et_data["evms"])
+                    result["GMP ET Total Time (s)"] = round(gmp_et_data["total_time"], 3)
 
             results.append(result)
             print(user_comment)

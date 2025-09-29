@@ -2,14 +2,13 @@
 # File: power_servo.py
 # Description:
 #   Power servo module for:
-#     - Adjusting VSG input power
-#     - Iteratively driving DUT output power to target level
-#     - Using NRX Power Meter feedback
-#     - Supporting servo loop with tolerance + iteration limits
+#     - External NRX-based servo (via PowerMeter)
+#     - Internal K18 VSA-based servo
+#     - Supports tolerance + iteration limits
 # ==============================================================
 
 import logging
-from time import time
+from time import time, sleep
 
 # --------------------------------------------------------------
 # Logging Setup
@@ -28,7 +27,7 @@ class PowerServo:
         Args:
             vsg: VSG instance for setting input power.
             pm: PowerMeter instance for measuring DUT power.
-            vsa: VSA instance (used to update reference level).
+            vsa: VSA instance (used to update reference level or run K18 servo).
             max_iterations (int): Max allowed servo iterations.
             tolerance (float): Power tolerance in dB for convergence.
         """
@@ -40,61 +39,105 @@ class PowerServo:
         self.logger = logging.getLogger(__name__)
 
     # ----------------------------------------------------------
-    # Servo loop
+    # External NRX Power Servo (wraps old servo_power)
     # ----------------------------------------------------------
-    def servo_power(self, freq_ghz, target_output, expected_gain):
+    def external_servo(self, freq_ghz, target_output, expected_gain, servo_iterations):
         """
-        Run servo loop to adjust input power until DUT output reaches target.
+        Run servo loop using NRX PowerMeter feedback.
 
         Args:
             freq_ghz (float): Frequency in GHz (for logging).
             target_output (float): Desired output power (dBm).
             expected_gain (float): Expected DUT gain (dB).
+            servo_iterations (int): Max number of iterations.
 
         Returns:
             tuple: (servo_iterations, servo_settle_time)
         """
-        # Measure initial DUT gain
-        expected_gain = self.pm.measure()[1] - self.pm.measure()[0]
-        self.logger.info(f"Measured gain in dB: {expected_gain:.3f}")
-        print(f"Measured gain in dB: {expected_gain:.3f}")
+        self.max_iterations = servo_iterations
+        return self.servo_power(freq_ghz, target_output, expected_gain)
 
-        # Calculate initial input power estimate
-        initial_pwr = target_output - expected_gain
-        self.vsg.set_power(initial_pwr)
+    def servo_power(self, freq_ghz, target_output, expected_gain):
+        """
+        Iterative loop to drive DUT output power to target using NRX.
 
-        servo_start_time = time()
-        servo_iterations = 0
+        Returns:
+            tuple: (servo_iterations, servo_settle_time)
+        """
+        # Estimate gain from measurement
+        measured_in, measured_out = self.pm.measure()
+        measured_gain = measured_out - measured_in
+        self.logger.info(f"Measured DUT gain: {measured_gain:.3f} dB")
+        print(f"Measured gain in dB: {measured_gain:.3f}")
+
+        # Initial input power estimate
+        input_power = target_output - measured_gain
+        self.vsg.set_power(input_power)
+
+        servo_start = time()
+        servo_loops = 0
         servo_settle_time = None
 
-        # Iteratively adjust input power
         for i in range(self.max_iterations):
             _, current_output = self.pm.measure()
-            servo_iterations = i + 1
+            servo_loops = i + 1
 
-            # Check convergence
             if abs(current_output - target_output) < self.tolerance:
-                servo_settle_time = round(time() - servo_start_time, 3)
+                servo_settle_time = round(time() - servo_start, 3)
                 self.logger.info(
-                    f"Servo converged after {servo_iterations} iterations "
-                    f"servo settle time, , {servo_settle_time} s\n Frequency {freq_ghz} GHz"
+                    f"NRX servo converged after {servo_loops} iterations "
+                    f"(time={servo_settle_time:.3f}s, freq={freq_ghz} GHz)"
                 )
                 break
 
-            # Adjust input power based on error
             adjustment = target_output - current_output
-            initial_pwr += adjustment
-            self.vsg.set_power(initial_pwr)
+            input_power += adjustment
+            self.vsg.set_power(input_power)
         else:
-            # Did not converge
-            servo_settle_time = round(time() - servo_start_time, 3)
+            servo_settle_time = round(time() - servo_start, 3)
             self.logger.warning(
-                f"Servo did not converge within {self.max_iterations} iterations "
-                f"at {freq_ghz} GHz (Time, , {servo_settle_time}s)"
+                f"NRX servo did not converge within {self.max_iterations} iterations "
+                f"at {freq_ghz} GHz (time={servo_settle_time:.3f}s)"
             )
 
-        # Final log + return
-        self.logger.info(f"Servo Iterations: {servo_iterations}, Servo Time: {servo_settle_time}")
-        #  print(f"nrx servo converged after {servo_iterations} iterations")
-        #  print(f"nrx power servo time , ,{servo_settle_time:.3f}")
-        return servo_iterations, servo_settle_time
+        return servo_loops, servo_settle_time
+
+    # ----------------------------------------------------------
+    # Internal K18 Power Servo
+    # ----------------------------------------------------------
+    def k18_servo(self, target_output, servo_iterations, tolerance=0.1):
+        """
+        Run internal K18 power servo on the VSA.
+
+        Args:
+            target_output (float): Desired output power (dBm).
+            servo_iterations (int): Max number of iterations.
+            tolerance (float): Allowed tolerance in dB.
+
+        Returns:
+            tuple: (servo_iterations, k18_servo_time)
+        """
+        k18_start = time()
+
+        try:
+            self.vsa.instr.query('INST:SEL "Amplifier"; *OPC?')
+            self.vsa.instr.query('CONF:GEN:CONN:STAT ON; *OPC?')
+            self.vsa.instr.query('CONF:GEN:CONT:STAT ON; *OPC?')
+            self.vsa.instr.query('CONF:GEN:POW:LEV:STAT ON; *OPC?')
+            self.vsa.instr.query(f'CONF:GEN:POW:LEV:TARG {target_output:.2f}; *OPC?')
+            self.vsa.instr.query(f'CONF:GEN:POW:LEV:ITER {servo_iterations}; *OPC?')
+            self.vsa.instr.query(f'CONF:GEN:POW:LEV:TOL {tolerance:.2f}; *OPC?')
+            self.vsa.instr.query('CONF:GEN:POW:LEV:STAR; *OPC?')
+
+            k18_time = time() - k18_start
+            print(f"K18 servo time, , {k18_time:.3f}")
+            self.logger.info(f"K18 servo completed in {k18_time:.3f}s (target={target_output} dBm)")
+
+            # Switch back to 5G NR app
+            self.vsa.instr.query('INST:SEL "5G NR"; *OPC?')
+
+        except Exception as e:
+            self.logger.error(f"K18 servo failed: {str(e)}")
+            raise
+
+        return servo_iterations, round(k18_time, 3)

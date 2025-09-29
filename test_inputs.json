@@ -17,7 +17,11 @@
     "frame_type": "full_frame",
     "enable_polynomial_dpd": true,
     "enable_direct_dpd": false,
-    "enable_gmp_dpd": false
+    "enable_gmp_dpd": false,
+    "enable_envelope_tracking": true,
+    "et_starting_delay": 0,
+    "et_delay_shifts": 14,
+    "et_delay_step": 1e-9
   },
   "User_Comments": {
     "10MHz_full_frame_nrx": [

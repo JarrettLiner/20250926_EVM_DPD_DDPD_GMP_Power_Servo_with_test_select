@@ -908,3 +908,487 @@
 2025-09-29 08:56:54,601 - Socket closed
 2025-09-29 08:56:54,601 - Socket closed
 2025-09-29 08:56:54,601 - Socket closed
+2025-09-29 09:59:43,696 - Connected to 192.168.200.10:5025
+2025-09-29 09:59:43,696 - Query: *IDN?
+2025-09-29 09:59:43,697 - Response: Rohde&Schwarz,SMW200A,1412.0000K02/111891,5.30.305.48
+2025-09-29 09:59:43,697 - Query: *RST; *OPC?
+2025-09-29 09:59:44,807 - Response: 1
+2025-09-29 09:59:44,808 - Query: *OPC?
+2025-09-29 09:59:44,808 - Response: 1
+2025-09-29 09:59:44,808 - Query: SOURce1:CORRection:OPTimize:RF:CHARacteristics EVM; *OPC?
+2025-09-29 09:59:44,810 - Response: 1
+2025-09-29 09:59:44,810 - Query: OUTPut1:AMODe AUTO; *OPC?
+2025-09-29 09:59:44,811 - Response: 1
+2025-09-29 09:59:44,811 - Query: SOURce1:POWer:LIM:AMPL 10; *OPC?
+2025-09-29 09:59:44,811 - Response: 1
+2025-09-29 09:59:44,811 - Query: SOURce1:POWer:ATTenuation:DIGital -3.522; *OPC?
+2025-09-29 09:59:44,813 - Response: 1
+2025-09-29 09:59:44,813 - Query: SOURce1:BB:ARBitrary:WAVeform:SELect "/var/user/Qorvo/NR5G_100MHz_UL_60kHzSCS_256QAM_135rb_0rbo_fullframe.wv"; *OPC?
+2025-09-29 09:59:44,814 - Response: 1
+2025-09-29 09:59:44,814 - Query: SOURce1:BB:ARBitrary:STATe 1; *OPC?
+2025-09-29 09:59:44,916 - Response: 1
+2025-09-29 09:59:44,916 - Query: :SOUR1:FREQ:CW 2000000000.0; *OPC?
+2025-09-29 09:59:44,920 - Response: 1
+2025-09-29 09:59:44,920 - Query: OUTPut1:STATe ON; *OPC?
+2025-09-29 09:59:44,953 - Response: 1
+2025-09-29 09:59:44,953 - VSG initialized in 1.264s using signal_bandwidth '100MHz' and frame_type 'full_frame'
+2025-09-29 09:59:44,956 - Connected to 192.168.200.20:5025
+2025-09-29 09:59:44,956 - Query: *IDN?
+2025-09-29 09:59:44,963 - Response: Rohde&Schwarz,FSW-50,1331.5003K50/101878,6.20
+2025-09-29 09:59:44,965 - Connected to 192.168.200.20:5025
+2025-09-29 09:59:44,965 - Query: *IDN?
+2025-09-29 09:59:44,967 - Response: Rohde&Schwarz,FSW-50,1331.5003K50/101878,6.20
+2025-09-29 09:59:44,967 - Query: *RST; *OPC?
+2025-09-29 09:59:48,274 - Response: 1
+2025-09-29 09:59:48,274 - Query: *OPC?
+2025-09-29 09:59:48,275 - Response: 1
+2025-09-29 09:59:48,275 - Query: MMEM:LOAD:STAT 1,"C:\R_S\instr\user\Qorvo\5GNR_UL_100MHz_256QAM_60kHz_135RB_0RBO_fullframe"; *OPC?
+2025-09-29 09:59:49,708 - Response: 1
+2025-09-29 09:59:49,708 - Query: CONF:NR5G:DL:CC1:RFUC:STAT OFF; *OPC?
+2025-09-29 09:59:49,709 - Response: 1
+2025-09-29 09:59:49,709 - Query: :SENS:SWE:TIME 0.0101; *OPC?
+2025-09-29 09:59:49,743 - Response: 1
+2025-09-29 09:59:49,743 - Query: INIT:CONT OFF; *OPC?
+2025-09-29 09:59:49,750 - Response: 1
+2025-09-29 09:59:49,750 - Query: INIT:IMM; *OPC?
+2025-09-29 09:59:50,612 - Response: 1
+2025-09-29 09:59:50,612 - Query: INST:SEL "Amplifier"; *OPC?
+2025-09-29 09:59:50,644 - Response: 1
+2025-09-29 09:59:50,644 - Query: CONF:GEN:CONN:STAT ON; *OPC?
+2025-09-29 09:59:51,614 - Response: 1
+2025-09-29 09:59:51,614 - Query: CONF:GEN:CONT:STAT ON; *OPC?
+2025-09-29 09:59:51,617 - Response: 1
+2025-09-29 09:59:51,617 - Query: CONF:SETT; *OPC?
+2025-09-29 09:59:51,651 - Response: 1
+2025-09-29 09:59:51,651 - Query: :CONF:REFS:CGW:READ; *OPC?
+2025-09-29 09:59:56,172 - Response: 1
+2025-09-29 09:59:56,172 - Query: :CONF:DDPD:STAT OFF; *OPC?
+2025-09-29 09:59:56,173 - Response: 1
+2025-09-29 09:59:56,173 - Query: :SENS:ADJ:LEV; *OPC?
+2025-09-29 09:59:56,785 - Response: 1
+2025-09-29 09:59:56,785 - Query: INIT:CONT OFF; *OPC?
+2025-09-29 09:59:56,786 - Response: 1
+2025-09-29 09:59:56,786 - Query: INIT:IMM; *OPC?
+2025-09-29 09:59:59,094 - Response: 1
+2025-09-29 09:59:59,095 - Query: CONF:DPD:METH GEN; *OPC?
+2025-09-29 09:59:59,096 - Response: 1
+2025-09-29 09:59:59,096 - Query: CONF:DPD:SHAP:MODE POLY; *OPC?
+2025-09-29 09:59:59,104 - Response: 1
+2025-09-29 09:59:59,104 - Query: :CONF:DPD:TRAD 100; *OPC?
+2025-09-29 09:59:59,116 - Response: 1
+2025-09-29 09:59:59,117 - Query: INIT:IMM; *OPC?
+2025-09-29 10:00:01,344 - Response: 1
+2025-09-29 10:00:01,344 - VSA initialized in 16.381s using signal_bandwidth '100MHz' and frame_type 'full_frame'
+2025-09-29 10:00:01,347 - Connected to 192.168.200.40:5025
+2025-09-29 10:00:01,347 - Query: *IDN?
+2025-09-29 10:00:01,954 - Response: Rohde&Schwarz,NRX,1424.7005k02/108679,02.62.24102302
+2025-09-29 10:00:01,954 - PowerMeter (NRX) initialized in 0.609s
+2025-09-29 10:00:01,954 - Initializing Envelope Tracking (ET)
+2025-09-29 10:00:01,954 - Query: :SENS1:FREQ 2000000000.0;:SENS2:FREQ 2000000000.0;:CALCulate1:CHANnel1:CORRection:OFFSet:MAGNitude 15.819;:CALCulate1:CHANnel1:CORRection:OFFSet:STATe ON;:CALCulate2:CHANnel1:CORRection:OFFSet:MAGNitude 10.187;:CALCulate2:CHANnel1:CORRection:OFFSet:STATe ON;*OPC?
+2025-09-29 10:00:01,959 - Response: 1
+2025-09-29 10:00:01,960 - PowerMeter configured for 2000000000.0 Hz with offsets 15.819, 10.187
+2025-09-29 10:00:01,960 - Query: SOURce1:BB:ARBitrary:WAVeform:SELect "/var/user/Qorvo/NR5G_100MHz_UL_60kHzSCS_256QAM_135rb_0rbo_fullframe.wv"; *OPC?
+2025-09-29 10:00:01,963 - Response: 1
+2025-09-29 10:00:01,963 - Write: :SOUR1:POW:LEV:IMM:OFFS -1.432
+2025-09-29 10:00:01,964 - Query: :OUTput1:AMODe AUTO; *OPC?
+2025-09-29 10:00:02,006 - Response: 1
+2025-09-29 10:00:02,006 - Query: :SOUR1:FREQ:CW 2000000000.0; *OPC?
+2025-09-29 10:00:02,007 - Response: 1
+2025-09-29 10:00:02,008 - Query: :SOUR1:POW:LEV:IMM:AMPL -12.0; *OPC?
+2025-09-29 10:00:02,049 - Response: 1
+2025-09-29 10:00:02,049 - Query: SOURce1:POWer:LIM:AMPL 10; *OPC?
+2025-09-29 10:00:02,050 - Response: 1
+2025-09-29 10:00:02,050 - Query: *OPC?
+2025-09-29 10:00:02,050 - Response: 1
+2025-09-29 10:00:02,050 - Query: INST:SEL "5G NR"; *OPC?
+2025-09-29 10:00:02,179 - Response: 1
+2025-09-29 10:00:02,179 - Query: :SENS:FREQ:CENT 2000000000.0; *OPC?
+2025-09-29 10:00:02,181 - Response: 1
+2025-09-29 10:00:02,181 - Write: :DISP:WIND:TRAC:Y:SCAL:RLEV:OFFS 1.59
+2025-09-29 10:00:02,181 - Query: :CONF:NR5G:MEAS EVM; *OPC?
+2025-09-29 10:00:02,236 - Response: 1
+2025-09-29 10:00:02,236 - VSA configured for 2000000000.0 Hz with offset 1.59 dB
+2025-09-29 10:00:02,236 - Query: :MEAS1?
+2025-09-29 10:00:02,326 - Response: -1.206788E+01
+2025-09-29 10:00:02,327 - Query: :MEAS2?
+2025-09-29 10:00:02,423 - Response: 6.326843E+00
+2025-09-29 10:00:02,423 - Query: *OPC?
+2025-09-29 10:00:02,424 - Response: 1
+2025-09-29 10:00:02,425 - Query: INST:SEL "5G NR"; *OPC?
+2025-09-29 10:00:02,426 - Response: 1
+2025-09-29 10:00:02,426 - Query: CONF:NR5G:MEAS EVM; *OPC?
+2025-09-29 10:00:02,427 - Response: 1
+2025-09-29 10:00:02,427 - Baseline EVM failed: 'PowerServo' object has no attribute 'external_servo'
+2025-09-29 10:00:02,427 - VSG socket closed
+2025-09-29 10:00:02,427 - Socket closed
+2025-09-29 10:00:02,427 - VSA socket closed
+2025-09-29 10:00:02,427 - PowerMeter socket closed
+2025-09-29 10:00:02,453 - Saved sweep results to: C:\Users\LINER\Documents\PycharmProjects\20250926_EVM_DPD_DDPD_GMP_Power_Servo_with_test_select\sweep_measurements.xlsx
+2025-09-29 10:00:02,453 - Processed frequencies (GHz): [np.float64(2.0)]
+2025-09-29 10:00:02,491 - Socket closed
+2025-09-29 10:00:02,492 - Socket closed
+2025-09-29 10:00:02,492 - Socket closed
+2025-09-29 10:00:02,493 - Socket closed
+2025-09-29 10:14:36,253 - Connected to 192.168.200.10:5025
+2025-09-29 10:14:36,253 - Query: *IDN?
+2025-09-29 10:14:36,254 - Response: Rohde&Schwarz,SMW200A,1412.0000K02/111891,5.30.305.48
+2025-09-29 10:14:36,254 - Query: *RST; *OPC?
+2025-09-29 10:14:37,626 - Response: 1
+2025-09-29 10:14:37,627 - Query: *OPC?
+2025-09-29 10:14:37,628 - Response: 1
+2025-09-29 10:14:37,628 - Query: SOURce1:CORRection:OPTimize:RF:CHARacteristics EVM; *OPC?
+2025-09-29 10:14:37,631 - Response: 1
+2025-09-29 10:14:37,631 - Query: OUTPut1:AMODe AUTO; *OPC?
+2025-09-29 10:14:37,632 - Response: 1
+2025-09-29 10:14:37,632 - Query: SOURce1:POWer:LIM:AMPL 10; *OPC?
+2025-09-29 10:14:37,633 - Response: 1
+2025-09-29 10:14:37,633 - Query: SOURce1:POWer:ATTenuation:DIGital -3.522; *OPC?
+2025-09-29 10:14:37,635 - Response: 1
+2025-09-29 10:14:37,635 - Query: SOURce1:BB:ARBitrary:WAVeform:SELect "/var/user/Qorvo/NR5G_100MHz_UL_60kHzSCS_256QAM_135rb_0rbo_fullframe.wv"; *OPC?
+2025-09-29 10:14:37,637 - Response: 1
+2025-09-29 10:14:37,637 - Query: SOURce1:BB:ARBitrary:STATe 1; *OPC?
+2025-09-29 10:14:37,739 - Response: 1
+2025-09-29 10:14:37,739 - Query: :SOUR1:FREQ:CW 2000000000.0; *OPC?
+2025-09-29 10:14:37,744 - Response: 1
+2025-09-29 10:14:37,744 - Query: OUTPut1:STATe ON; *OPC?
+2025-09-29 10:14:37,777 - Response: 1
+2025-09-29 10:14:37,778 - VSG initialized in 1.532s using signal_bandwidth '100MHz' and frame_type 'full_frame'
+2025-09-29 10:14:37,785 - Connected to 192.168.200.20:5025
+2025-09-29 10:14:37,786 - Query: *IDN?
+2025-09-29 10:14:37,792 - Response: Rohde&Schwarz,FSW-50,1331.5003K50/101878,6.20
+2025-09-29 10:14:37,798 - Connected to 192.168.200.20:5025
+2025-09-29 10:14:37,799 - Query: *IDN?
+2025-09-29 10:14:37,801 - Response: Rohde&Schwarz,FSW-50,1331.5003K50/101878,6.20
+2025-09-29 10:14:37,801 - Query: *RST; *OPC?
+2025-09-29 10:14:41,118 - Response: 1
+2025-09-29 10:14:41,118 - Query: *OPC?
+2025-09-29 10:14:41,119 - Response: 1
+2025-09-29 10:14:41,120 - Query: MMEM:LOAD:STAT 1,"C:\R_S\instr\user\Qorvo\5GNR_UL_100MHz_256QAM_60kHz_135RB_0RBO_fullframe"; *OPC?
+2025-09-29 10:14:42,551 - Response: 1
+2025-09-29 10:14:42,552 - Query: CONF:NR5G:DL:CC1:RFUC:STAT OFF; *OPC?
+2025-09-29 10:14:42,553 - Response: 1
+2025-09-29 10:14:42,553 - Query: :SENS:SWE:TIME 0.0101; *OPC?
+2025-09-29 10:14:42,588 - Response: 1
+2025-09-29 10:14:42,588 - Query: INIT:CONT OFF; *OPC?
+2025-09-29 10:14:42,595 - Response: 1
+2025-09-29 10:14:42,596 - Query: INIT:IMM; *OPC?
+2025-09-29 10:14:43,451 - Response: 1
+2025-09-29 10:14:43,452 - Query: INST:SEL "Amplifier"; *OPC?
+2025-09-29 10:14:43,490 - Response: 1
+2025-09-29 10:14:43,491 - Query: CONF:GEN:CONN:STAT ON; *OPC?
+2025-09-29 10:14:44,109 - Response: 1
+2025-09-29 10:14:44,110 - Query: CONF:GEN:CONT:STAT ON; *OPC?
+2025-09-29 10:14:44,115 - Response: 1
+2025-09-29 10:14:44,116 - Query: CONF:SETT; *OPC?
+2025-09-29 10:14:44,145 - Response: 1
+2025-09-29 10:14:44,146 - Query: :CONF:REFS:CGW:READ; *OPC?
+2025-09-29 10:14:48,692 - Response: 1
+2025-09-29 10:14:48,692 - Query: :CONF:DDPD:STAT OFF; *OPC?
+2025-09-29 10:14:48,694 - Response: 1
+2025-09-29 10:14:48,694 - Query: :SENS:ADJ:LEV; *OPC?
+2025-09-29 10:14:49,322 - Response: 1
+2025-09-29 10:14:49,323 - Query: INIT:CONT OFF; *OPC?
+2025-09-29 10:14:49,323 - Response: 1
+2025-09-29 10:14:49,324 - Query: INIT:IMM; *OPC?
+2025-09-29 10:14:51,631 - Response: 1
+2025-09-29 10:14:51,631 - Query: CONF:DPD:METH GEN; *OPC?
+2025-09-29 10:14:51,633 - Response: 1
+2025-09-29 10:14:51,633 - Query: CONF:DPD:SHAP:MODE POLY; *OPC?
+2025-09-29 10:14:51,654 - Response: 1
+2025-09-29 10:14:51,654 - Query: :CONF:DPD:TRAD 100; *OPC?
+2025-09-29 10:14:51,656 - Response: 1
+2025-09-29 10:14:51,656 - Query: INIT:IMM; *OPC?
+2025-09-29 10:14:53,876 - Response: 1
+2025-09-29 10:14:53,877 - VSA initialized in 16.082s using signal_bandwidth '100MHz' and frame_type 'full_frame'
+2025-09-29 10:14:53,883 - Connected to 192.168.200.40:5025
+2025-09-29 10:14:53,884 - Query: *IDN?
+2025-09-29 10:14:54,530 - Response: Rohde&Schwarz,NRX,1424.7005k02/108679,02.62.24102302
+2025-09-29 10:14:54,531 - PowerMeter (NRX) initialized in 0.651s
+2025-09-29 10:14:54,531 - Initializing Envelope Tracking (ET)
+2025-09-29 10:14:54,531 - Query: :SENS1:FREQ 2000000000.0;:SENS2:FREQ 2000000000.0;:CALCulate1:CHANnel1:CORRection:OFFSet:MAGNitude 15.819;:CALCulate1:CHANnel1:CORRection:OFFSet:STATe ON;:CALCulate2:CHANnel1:CORRection:OFFSet:MAGNitude 10.187;:CALCulate2:CHANnel1:CORRection:OFFSet:STATe ON;*OPC?
+2025-09-29 10:14:54,536 - Response: 1
+2025-09-29 10:14:54,536 - PowerMeter configured for 2000000000.0 Hz with offsets 15.819, 10.187
+2025-09-29 10:14:54,537 - Query: SOURce1:BB:ARBitrary:WAVeform:SELect "/var/user/Qorvo/NR5G_100MHz_UL_60kHzSCS_256QAM_135rb_0rbo_fullframe.wv"; *OPC?
+2025-09-29 10:14:54,540 - Response: 1
+2025-09-29 10:14:54,540 - Write: :SOUR1:POW:LEV:IMM:OFFS -1.432
+2025-09-29 10:14:54,540 - Query: :OUTput1:AMODe AUTO; *OPC?
+2025-09-29 10:14:54,583 - Response: 1
+2025-09-29 10:14:54,584 - Query: :SOUR1:FREQ:CW 2000000000.0; *OPC?
+2025-09-29 10:14:54,585 - Response: 1
+2025-09-29 10:14:54,585 - Query: :SOUR1:POW:LEV:IMM:AMPL -12.0; *OPC?
+2025-09-29 10:14:54,626 - Response: 1
+2025-09-29 10:14:54,627 - Query: SOURce1:POWer:LIM:AMPL 10; *OPC?
+2025-09-29 10:14:54,628 - Response: 1
+2025-09-29 10:14:54,628 - Query: *OPC?
+2025-09-29 10:14:54,628 - Response: 1
+2025-09-29 10:14:54,628 - Query: INST:SEL "5G NR"; *OPC?
+2025-09-29 10:14:54,759 - Response: 1
+2025-09-29 10:14:54,760 - Query: :SENS:FREQ:CENT 2000000000.0; *OPC?
+2025-09-29 10:14:54,761 - Response: 1
+2025-09-29 10:14:54,761 - Write: :DISP:WIND:TRAC:Y:SCAL:RLEV:OFFS 1.59
+2025-09-29 10:14:54,761 - Query: :CONF:NR5G:MEAS EVM; *OPC?
+2025-09-29 10:14:54,804 - Response: 1
+2025-09-29 10:14:54,805 - VSA configured for 2000000000.0 Hz with offset 1.59 dB
+2025-09-29 10:14:54,805 - Query: :MEAS1?
+2025-09-29 10:14:54,897 - Response: -1.206686E+01
+2025-09-29 10:14:54,898 - Query: :MEAS2?
+2025-09-29 10:14:55,004 - Response: 6.327605E+00
+2025-09-29 10:14:55,004 - Query: *OPC?
+2025-09-29 10:14:55,006 - Response: 1
+2025-09-29 10:14:55,006 - Query: INST:SEL "5G NR"; *OPC?
+2025-09-29 10:14:55,007 - Response: 1
+2025-09-29 10:14:55,007 - Query: CONF:NR5G:MEAS EVM; *OPC?
+2025-09-29 10:14:55,008 - Response: 1
+2025-09-29 10:14:55,008 - Baseline EVM failed: 'PowerServo' object has no attribute 'external_servo'
+2025-09-29 10:14:55,009 - VSG socket closed
+2025-09-29 10:14:55,009 - Socket closed
+2025-09-29 10:14:55,010 - VSA socket closed
+2025-09-29 10:14:55,010 - PowerMeter socket closed
+2025-09-29 10:14:55,056 - Saved sweep results to: C:\Users\LINER\Documents\PycharmProjects\20250926_EVM_DPD_DDPD_GMP_Power_Servo_with_test_select\sweep_measurements.xlsx
+2025-09-29 10:14:55,056 - Processed frequencies (GHz): [np.float64(2.0)]
+2025-09-29 10:14:55,115 - Socket closed
+2025-09-29 10:14:55,117 - Socket closed
+2025-09-29 10:14:55,117 - Socket closed
+2025-09-29 10:14:55,117 - Socket closed
+2025-09-29 11:12:42,935 - Connected to 192.168.200.10:5025
+2025-09-29 11:12:42,935 - Query: *IDN?
+2025-09-29 11:12:42,936 - Response: Rohde&Schwarz,SMW200A,1412.0000K02/111891,5.30.305.48
+2025-09-29 11:12:42,936 - Query: *RST; *OPC?
+2025-09-29 11:12:44,301 - Response: 1
+2025-09-29 11:12:44,302 - Query: *OPC?
+2025-09-29 11:12:44,302 - Response: 1
+2025-09-29 11:12:44,302 - Query: SOURce1:CORRection:OPTimize:RF:CHARacteristics EVM; *OPC?
+2025-09-29 11:12:44,304 - Response: 1
+2025-09-29 11:12:44,304 - Query: OUTPut1:AMODe AUTO; *OPC?
+2025-09-29 11:12:44,305 - Response: 1
+2025-09-29 11:12:44,305 - Query: SOURce1:POWer:LIM:AMPL 10; *OPC?
+2025-09-29 11:12:44,306 - Response: 1
+2025-09-29 11:12:44,306 - Query: SOURce1:POWer:ATTenuation:DIGital -3.522; *OPC?
+2025-09-29 11:12:44,307 - Response: 1
+2025-09-29 11:12:44,307 - Query: SOURce1:BB:ARBitrary:WAVeform:SELect "/var/user/Qorvo/NR5G_100MHz_UL_60kHzSCS_256QAM_135rb_0rbo_fullframe.wv"; *OPC?
+2025-09-29 11:12:44,309 - Response: 1
+2025-09-29 11:12:44,309 - Query: SOURce1:BB:ARBitrary:STATe 1; *OPC?
+2025-09-29 11:12:44,410 - Response: 1
+2025-09-29 11:12:44,411 - Query: :SOUR1:FREQ:CW 2000000000.0; *OPC?
+2025-09-29 11:12:44,414 - Response: 1
+2025-09-29 11:12:44,414 - Query: OUTPut1:STATe ON; *OPC?
+2025-09-29 11:12:44,447 - Response: 1
+2025-09-29 11:12:44,448 - VSG initialized in 1.517s using signal_bandwidth '100MHz' and frame_type 'full_frame'
+2025-09-29 11:12:44,452 - Connected to 192.168.200.20:5025
+2025-09-29 11:12:44,452 - Query: *IDN?
+2025-09-29 11:12:44,459 - Response: Rohde&Schwarz,FSW-50,1331.5003K50/101878,6.20
+2025-09-29 11:12:44,462 - Connected to 192.168.200.20:5025
+2025-09-29 11:12:44,463 - Query: *IDN?
+2025-09-29 11:12:44,464 - Response: Rohde&Schwarz,FSW-50,1331.5003K50/101878,6.20
+2025-09-29 11:12:44,464 - Query: *RST; *OPC?
+2025-09-29 11:12:47,754 - Response: 1
+2025-09-29 11:12:47,755 - Query: *OPC?
+2025-09-29 11:12:47,755 - Response: 1
+2025-09-29 11:12:47,756 - Query: MMEM:LOAD:STAT 1,"C:\R_S\instr\user\Qorvo\5GNR_UL_100MHz_256QAM_60kHz_135RB_0RBO_fullframe"; *OPC?
+2025-09-29 11:12:49,196 - Response: 1
+2025-09-29 11:12:49,196 - Query: CONF:NR5G:DL:CC1:RFUC:STAT OFF; *OPC?
+2025-09-29 11:12:49,197 - Response: 1
+2025-09-29 11:12:49,197 - Query: :SENS:SWE:TIME 0.0101; *OPC?
+2025-09-29 11:12:49,218 - Response: 1
+2025-09-29 11:12:49,219 - Query: INIT:CONT OFF; *OPC?
+2025-09-29 11:12:49,220 - Response: 1
+2025-09-29 11:12:49,220 - Query: INIT:IMM; *OPC?
+2025-09-29 11:12:50,115 - Response: 1
+2025-09-29 11:12:50,115 - Query: INST:SEL "Amplifier"; *OPC?
+2025-09-29 11:12:50,152 - Response: 1
+2025-09-29 11:12:50,152 - Query: CONF:GEN:CONN:STAT ON; *OPC?
+2025-09-29 11:12:50,901 - Response: 1
+2025-09-29 11:12:50,901 - Query: CONF:GEN:CONT:STAT ON; *OPC?
+2025-09-29 11:12:50,903 - Response: 1
+2025-09-29 11:12:50,903 - Query: CONF:SETT; *OPC?
+2025-09-29 11:12:50,937 - Response: 1
+2025-09-29 11:12:50,937 - Query: :CONF:REFS:CGW:READ; *OPC?
+2025-09-29 11:12:55,995 - Response: 1
+2025-09-29 11:12:55,995 - Query: :CONF:DDPD:STAT OFF; *OPC?
+2025-09-29 11:12:55,996 - Response: 1
+2025-09-29 11:12:55,996 - Query: :SENS:ADJ:LEV; *OPC?
+2025-09-29 11:12:56,606 - Response: 1
+2025-09-29 11:12:56,606 - Query: INIT:CONT OFF; *OPC?
+2025-09-29 11:12:56,607 - Response: 1
+2025-09-29 11:12:56,607 - Query: INIT:IMM; *OPC?
+2025-09-29 11:12:58,916 - Response: 1
+2025-09-29 11:12:58,917 - Query: CONF:DPD:METH GEN; *OPC?
+2025-09-29 11:12:58,918 - Response: 1
+2025-09-29 11:12:58,918 - Query: CONF:DPD:SHAP:MODE POLY; *OPC?
+2025-09-29 11:12:58,925 - Response: 1
+2025-09-29 11:12:58,925 - Query: :CONF:DPD:TRAD 100; *OPC?
+2025-09-29 11:12:58,926 - Response: 1
+2025-09-29 11:12:58,926 - Query: INIT:IMM; *OPC?
+2025-09-29 11:13:01,113 - Response: 1
+2025-09-29 11:13:01,113 - VSA initialized in 16.653s using signal_bandwidth '100MHz' and frame_type 'full_frame'
+2025-09-29 11:13:01,116 - Connected to 192.168.200.40:5025
+2025-09-29 11:13:01,116 - Query: *IDN?
+2025-09-29 11:13:01,675 - Response: Rohde&Schwarz,NRX,1424.7005k02/108679,02.62.24102302
+2025-09-29 11:13:01,675 - PowerMeter (NRX) initialized in 0.562s
+2025-09-29 11:13:01,675 - Initializing Envelope Tracking (ET)
+2025-09-29 11:13:01,676 - Query: :SENS1:FREQ 2000000000.0;:SENS2:FREQ 2000000000.0;:CALCulate1:CHANnel1:CORRection:OFFSet:MAGNitude 15.819;:CALCulate1:CHANnel1:CORRection:OFFSet:STATe ON;:CALCulate2:CHANnel1:CORRection:OFFSet:MAGNitude 10.187;:CALCulate2:CHANnel1:CORRection:OFFSet:STATe ON;*OPC?
+2025-09-29 11:13:01,682 - Response: 1
+2025-09-29 11:13:01,682 - PowerMeter configured for 2000000000.0 Hz with offsets 15.819, 10.187
+2025-09-29 11:13:01,682 - Query: SOURce1:BB:ARBitrary:WAVeform:SELect "/var/user/Qorvo/NR5G_100MHz_UL_60kHzSCS_256QAM_135rb_0rbo_fullframe.wv"; *OPC?
+2025-09-29 11:13:01,685 - Response: 1
+2025-09-29 11:13:01,685 - Write: :SOUR1:POW:LEV:IMM:OFFS -1.432
+2025-09-29 11:13:01,686 - Query: :OUTput1:AMODe AUTO; *OPC?
+2025-09-29 11:13:01,727 - Response: 1
+2025-09-29 11:13:01,727 - Query: :SOUR1:FREQ:CW 2000000000.0; *OPC?
+2025-09-29 11:13:01,728 - Response: 1
+2025-09-29 11:13:01,728 - Query: :SOUR1:POW:LEV:IMM:AMPL -12.0; *OPC?
+2025-09-29 11:13:01,769 - Response: 1
+2025-09-29 11:13:01,769 - Query: SOURce1:POWer:LIM:AMPL 10; *OPC?
+2025-09-29 11:13:01,770 - Response: 1
+2025-09-29 11:13:01,770 - Query: *OPC?
+2025-09-29 11:13:01,771 - Response: 1
+2025-09-29 11:13:01,771 - Query: INST:SEL "5G NR"; *OPC?
+2025-09-29 11:13:01,900 - Response: 1
+2025-09-29 11:13:01,900 - Query: :SENS:FREQ:CENT 2000000000.0; *OPC?
+2025-09-29 11:13:01,901 - Response: 1
+2025-09-29 11:13:01,902 - Write: :DISP:WIND:TRAC:Y:SCAL:RLEV:OFFS 1.59
+2025-09-29 11:13:01,902 - Query: :CONF:NR5G:MEAS EVM; *OPC?
+2025-09-29 11:13:01,951 - Response: 1
+2025-09-29 11:13:01,951 - VSA configured for 2000000000.0 Hz with offset 1.59 dB
+2025-09-29 11:13:01,951 - Query: :MEAS1?
+2025-09-29 11:13:02,048 - Response: -1.207675E+01
+2025-09-29 11:13:02,048 - Query: :MEAS2?
+2025-09-29 11:13:02,140 - Response: 6.317775E+00
+2025-09-29 11:13:02,141 - Query: *OPC?
+2025-09-29 11:13:02,142 - Response: 1
+2025-09-29 11:13:02,142 - Query: INST:SEL "5G NR"; *OPC?
+2025-09-29 11:13:02,143 - Response: 1
+2025-09-29 11:13:02,143 - Query: CONF:NR5G:MEAS EVM; *OPC?
+2025-09-29 11:13:02,144 - Response: 1
+2025-09-29 11:13:02,144 - Baseline EVM failed: 'PowerServo' object has no attribute 'external_servo'
+2025-09-29 11:13:02,145 - VSG socket closed
+2025-09-29 11:13:02,145 - Socket closed
+2025-09-29 11:13:02,145 - VSA socket closed
+2025-09-29 11:13:02,145 - PowerMeter socket closed
+2025-09-29 11:13:02,165 - Saved sweep results to: C:\Users\LINER\Documents\PycharmProjects\20250926_EVM_DPD_DDPD_GMP_Power_Servo_with_test_select\sweep_measurements.xlsx
+2025-09-29 11:13:02,165 - Processed frequencies (GHz): [np.float64(2.0)]
+2025-09-29 11:13:02,203 - Socket closed
+2025-09-29 11:13:02,204 - Socket closed
+2025-09-29 11:13:02,205 - Socket closed
+2025-09-29 11:13:02,205 - Socket closed
+2025-09-29 11:34:24,502 - Connected to 192.168.200.10:5025
+2025-09-29 11:34:24,502 - Query: *IDN?
+2025-09-29 11:34:24,503 - Response: Rohde&Schwarz,SMW200A,1412.0000K02/111891,5.30.305.48
+2025-09-29 11:34:24,503 - Query: *RST; *OPC?
+2025-09-29 11:34:25,887 - Response: 1
+2025-09-29 11:34:25,887 - Query: *OPC?
+2025-09-29 11:34:25,888 - Response: 1
+2025-09-29 11:34:25,888 - Query: SOURce1:CORRection:OPTimize:RF:CHARacteristics EVM; *OPC?
+2025-09-29 11:34:25,890 - Response: 1
+2025-09-29 11:34:25,890 - Query: OUTPut1:AMODe AUTO; *OPC?
+2025-09-29 11:34:25,891 - Response: 1
+2025-09-29 11:34:25,891 - Query: SOURce1:POWer:LIM:AMPL 10; *OPC?
+2025-09-29 11:34:25,891 - Response: 1
+2025-09-29 11:34:25,891 - Query: SOURce1:POWer:ATTenuation:DIGital -3.522; *OPC?
+2025-09-29 11:34:25,892 - Response: 1
+2025-09-29 11:34:25,893 - Query: SOURce1:BB:ARBitrary:WAVeform:SELect "/var/user/Qorvo/NR5G_100MHz_UL_60kHzSCS_256QAM_135rb_0rbo_fullframe.wv"; *OPC?
+2025-09-29 11:34:25,894 - Response: 1
+2025-09-29 11:34:25,894 - Query: SOURce1:BB:ARBitrary:STATe 1; *OPC?
+2025-09-29 11:34:25,996 - Response: 1
+2025-09-29 11:34:25,996 - Query: :SOUR1:FREQ:CW 2000000000.0; *OPC?
+2025-09-29 11:34:25,999 - Response: 1
+2025-09-29 11:34:26,000 - Query: OUTPut1:STATe ON; *OPC?
+2025-09-29 11:34:26,033 - Response: 1
+2025-09-29 11:34:26,033 - VSG initialized in 1.537s using signal_bandwidth '100MHz' and frame_type 'full_frame'
+2025-09-29 11:34:26,036 - Connected to 192.168.200.20:5025
+2025-09-29 11:34:26,036 - Query: *IDN?
+2025-09-29 11:34:26,041 - Response: Rohde&Schwarz,FSW-50,1331.5003K50/101878,6.20
+2025-09-29 11:34:26,044 - Connected to 192.168.200.20:5025
+2025-09-29 11:34:26,044 - Query: *IDN?
+2025-09-29 11:34:26,045 - Response: Rohde&Schwarz,FSW-50,1331.5003K50/101878,6.20
+2025-09-29 11:34:26,045 - Query: *RST; *OPC?
+2025-09-29 11:34:29,344 - Response: 1
+2025-09-29 11:34:29,344 - Query: *OPC?
+2025-09-29 11:34:29,345 - Response: 1
+2025-09-29 11:34:29,345 - Query: MMEM:LOAD:STAT 1,"C:\R_S\instr\user\Qorvo\5GNR_UL_100MHz_256QAM_60kHz_135RB_0RBO_fullframe"; *OPC?
+2025-09-29 11:34:30,778 - Response: 1
+2025-09-29 11:34:30,778 - Query: CONF:NR5G:DL:CC1:RFUC:STAT OFF; *OPC?
+2025-09-29 11:34:30,779 - Response: 1
+2025-09-29 11:34:30,779 - Query: :SENS:SWE:TIME 0.0101; *OPC?
+2025-09-29 11:34:30,819 - Response: 1
+2025-09-29 11:34:30,820 - Query: INIT:CONT OFF; *OPC?
+2025-09-29 11:34:30,823 - Response: 1
+2025-09-29 11:34:30,823 - Query: INIT:IMM; *OPC?
+2025-09-29 11:34:31,683 - Response: 1
+2025-09-29 11:34:31,683 - Query: INST:SEL "Amplifier"; *OPC?
+2025-09-29 11:34:31,722 - Response: 1
+2025-09-29 11:34:31,722 - Query: CONF:GEN:CONN:STAT ON; *OPC?
+2025-09-29 11:34:32,538 - Response: 1
+2025-09-29 11:34:32,538 - Query: CONF:GEN:CONT:STAT ON; *OPC?
+2025-09-29 11:34:32,543 - Response: 1
+2025-09-29 11:34:32,543 - Query: CONF:SETT; *OPC?
+2025-09-29 11:34:32,577 - Response: 1
+2025-09-29 11:34:32,577 - Query: :CONF:REFS:CGW:READ; *OPC?
+2025-09-29 11:34:37,127 - Response: 1
+2025-09-29 11:34:37,128 - Query: :CONF:DDPD:STAT OFF; *OPC?
+2025-09-29 11:34:37,128 - Response: 1
+2025-09-29 11:34:37,129 - Query: :SENS:ADJ:LEV; *OPC?
+2025-09-29 11:34:37,742 - Response: 1
+2025-09-29 11:34:37,742 - Query: INIT:CONT OFF; *OPC?
+2025-09-29 11:34:37,743 - Response: 1
+2025-09-29 11:34:37,743 - Query: INIT:IMM; *OPC?
+2025-09-29 11:34:40,052 - Response: 1
+2025-09-29 11:34:40,053 - Query: CONF:DPD:METH GEN; *OPC?
+2025-09-29 11:34:40,053 - Response: 1
+2025-09-29 11:34:40,054 - Query: CONF:DPD:SHAP:MODE POLY; *OPC?
+2025-09-29 11:34:40,074 - Response: 1
+2025-09-29 11:34:40,074 - Query: :CONF:DPD:TRAD 100; *OPC?
+2025-09-29 11:34:40,075 - Response: 1
+2025-09-29 11:34:40,075 - Query: INIT:IMM; *OPC?
+2025-09-29 11:34:42,271 - Response: 1
+2025-09-29 11:34:42,271 - VSA initialized in 16.229s using signal_bandwidth '100MHz' and frame_type 'full_frame'
+2025-09-29 11:34:42,274 - Connected to 192.168.200.40:5025
+2025-09-29 11:34:42,274 - Query: *IDN?
+2025-09-29 11:34:42,883 - Response: Rohde&Schwarz,NRX,1424.7005k02/108679,02.62.24102302
+2025-09-29 11:34:42,883 - PowerMeter (NRX) initialized in 0.611s
+2025-09-29 11:34:42,883 - Initializing Envelope Tracking (ET)
+2025-09-29 11:34:42,883 - Query: :SENS1:FREQ 2000000000.0;:SENS2:FREQ 2000000000.0;:CALCulate1:CHANnel1:CORRection:OFFSet:MAGNitude 15.819;:CALCulate1:CHANnel1:CORRection:OFFSet:STATe ON;:CALCulate2:CHANnel1:CORRection:OFFSet:MAGNitude 10.187;:CALCulate2:CHANnel1:CORRection:OFFSet:STATe ON;*OPC?
+2025-09-29 11:34:42,888 - Response: 1
+2025-09-29 11:34:42,888 - PowerMeter configured for 2000000000.0 Hz with offsets 15.819, 10.187
+2025-09-29 11:34:42,888 - Query: SOURce1:BB:ARBitrary:WAVeform:SELect "/var/user/Qorvo/NR5G_100MHz_UL_60kHzSCS_256QAM_135rb_0rbo_fullframe.wv"; *OPC?
+2025-09-29 11:34:42,891 - Response: 1
+2025-09-29 11:34:42,891 - Write: :SOUR1:POW:LEV:IMM:OFFS -1.432
+2025-09-29 11:34:42,892 - Query: :OUTput1:AMODe AUTO; *OPC?
+2025-09-29 11:34:42,933 - Response: 1
+2025-09-29 11:34:42,934 - Query: :SOUR1:FREQ:CW 2000000000.0; *OPC?
+2025-09-29 11:34:42,934 - Response: 1
+2025-09-29 11:34:42,935 - Query: :SOUR1:POW:LEV:IMM:AMPL -12.0; *OPC?
+2025-09-29 11:34:42,976 - Response: 1
+2025-09-29 11:34:42,976 - Query: SOURce1:POWer:LIM:AMPL 10; *OPC?
+2025-09-29 11:34:42,976 - Response: 1
+2025-09-29 11:34:42,976 - Query: *OPC?
+2025-09-29 11:34:42,977 - Response: 1
+2025-09-29 11:34:42,977 - Query: INST:SEL "5G NR"; *OPC?
+2025-09-29 11:34:43,103 - Response: 1
+2025-09-29 11:34:43,103 - Query: :SENS:FREQ:CENT 2000000000.0; *OPC?
+2025-09-29 11:34:43,104 - Response: 1
+2025-09-29 11:34:43,105 - Write: :DISP:WIND:TRAC:Y:SCAL:RLEV:OFFS 1.59
+2025-09-29 11:34:43,105 - Query: :CONF:NR5G:MEAS EVM; *OPC?
+2025-09-29 11:34:43,152 - Response: 1
+2025-09-29 11:34:43,153 - VSA configured for 2000000000.0 Hz with offset 1.59 dB
+2025-09-29 11:34:43,153 - Query: :MEAS1?
+2025-09-29 11:34:43,253 - Response: -1.204829E+01
+2025-09-29 11:34:43,253 - Query: :MEAS2?
+2025-09-29 11:34:43,347 - Response: 6.383402E+00
+2025-09-29 11:34:43,348 - Query: *OPC?
+2025-09-29 11:34:43,349 - Response: 1
+2025-09-29 11:34:43,349 - Query: INST:SEL "5G NR"; *OPC?
+2025-09-29 11:34:43,350 - Response: 1
+2025-09-29 11:34:43,350 - Query: CONF:NR5G:MEAS EVM; *OPC?
+2025-09-29 11:34:43,351 - Response: 1
+2025-09-29 11:34:43,351 - Baseline EVM failed: 'PowerServo' object has no attribute 'external_servo'
+2025-09-29 11:34:43,351 - VSG socket closed
+2025-09-29 11:34:43,351 - Socket closed
+2025-09-29 11:34:43,351 - VSA socket closed
+2025-09-29 11:34:43,351 - PowerMeter socket closed
+2025-09-29 11:34:43,368 - Saved sweep results to: C:\Users\LINER\Documents\PycharmProjects\20250926_EVM_DPD_DDPD_GMP_Power_Servo_with_test_select\sweep_measurements.xlsx
+2025-09-29 11:34:43,368 - Processed frequencies (GHz): [np.float64(2.0)]
+2025-09-29 11:34:43,394 - Socket closed
+2025-09-29 11:34:43,395 - Socket closed
+2025-09-29 11:34:43,395 - Socket closed
+2025-09-29 11:34:43,395 - Socket closed
