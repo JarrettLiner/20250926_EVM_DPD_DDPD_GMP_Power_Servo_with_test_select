@@ -159,9 +159,9 @@ class VSA:
             get_evm_start = time()
             evm_value = float(self.instr.query('FETC:CC1:ISRC:FRAM:SUMM:EVM:ALL:AVERage?'))
             get_evm_time = time() - get_evm_start
-            print(f"Get EVM time, , {get_evm_time:.3f}")
-            print("This includes fetching the EVM value from the 5G app")
-            return evm_value
+            #  print(f"Get EVM time, , {get_evm_time:.3f}")
+            #  print("This includes fetching the EVM value from the 5G app")
+            return evm_value, get_evm_time
         except Exception as e:
             logger.error(f"Fetching EVM value failed: {str(e)}")
             raise
@@ -201,13 +201,13 @@ class VSA:
             ext_servo_start = time()
             servo_loops, _ = power_servo.external_servo(freq_ghz, target_output, expected_gain, servo_iterations)
             ext_servo_time = time() - ext_servo_start
-            print(f"External servo time, , {ext_servo_time:.3f}s")
+            print(f"External servo time, , {ext_servo_time:.3f}")
 
         if use_k18_power_servo:
             k18_start = time()
             k18_loops, _ = power_servo.k18_servo(target_output, servo_iterations)
             k18_time = time() - k18_start
-            print(f"K18 servo time, , {k18_time:.3f}s")
+            print(f"K18 servo time, , {k18_time:.3f}")
             if use_power_servo:
                 servo_loops += k18_loops  # Accumulate if both servos used
             else:
@@ -243,11 +243,13 @@ class VSA:
                     expected_gain, power_servo, use_power_servo=None, use_k18_power_servo=None, et=None):
         """Measure baseline EVM and ACLR (no DPD)."""
         try:
+            print(f"\n------ Baseline EVM Test ------")
             total_evm_start = time()
             self.instr.query('INST:SEL "5G NR"; *OPC?')
             self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')
 
             # Run servos
+            print(f"\n------ power servo ------")
             power_servo_start = time()
             use_power_servo, use_k18_power_servo = self._resolve_servo_flags(use_power_servo, use_k18_power_servo)
             servo_loops, ext_servo_time, k18_time = self._run_servos(
@@ -255,16 +257,20 @@ class VSA:
                 use_power_servo, use_k18_power_servo
             )
             power_servo_time = time() - power_servo_start
-            print(f"Servo loop time, , {power_servo_time:.3f}s")
-            print(f"use nrx {use_power_servo}, use K18 {use_k18_power_servo}, servo iterations {servo_loops}")
+            #  print(f"\npower servo loop time, , {power_servo_time:.3f}s")
+            print(f"use nrx {use_power_servo}\nuse K18 {use_k18_power_servo}\nservo iterations {servo_loops}")
+            #  print("baseline evm power servo time, , {:.3f}".format(power_servo_time))
 
             # EVM measurement
+            print(f"\n------ measure baseline EVM aclr & power ------")
             evm_start = time()
             self.instr.query('INIT:IMM; *OPC?')
             vsa_power = float(self.instr.query('FETC:CC1:ISRC:FRAM:SUMM:POW:AVERage?'))
             evm_value = float(self.instr.query('FETC:CC1:ISRC:FRAM:SUMM:EVM:ALL:AVERage?'))
             evm_time = time() - evm_start
-            print(f"Baseline EVM and VSA Power time, , {evm_time:.3f}s")
+            print("evm = {:.3f} dB".format(evm_value))
+            print("5G app power = {:.3f} dBm".format(vsa_power))
+            print(f"Baseline EVM and VSA Power time, , {evm_time:.3f}")
             print("This includes VSA power and EVM measurement")
 
             # ACLR measurement
@@ -274,18 +280,21 @@ class VSA:
             aclr_list = self.instr.query('CALC:MARK:FUNC:POW:RES? ACP')
             chan_pow, adj_chan_lower, adj_chan_upper = [float(x) for x in aclr_list.split(',')[:3]]
             aclr_time = time() - aclr_start
-            print(f"Baseline ACLR time, , {aclr_time:.3f}s")
+            print("5G app channel power = {:.3f} dBm".format(chan_pow))
+            print(f"Baseline ACLR time, , {aclr_time:.3f}")
             print("This includes VSA ACLR measurement")
 
             # Envelope Tracking if enabled
+            print(f"\n------ Baseline EVM ET  ------")
             baseline_et_data = self._perform_et_sweep(et)
             if baseline_et_data:
-                print(f"Baseline ET total time (incl. config), , {baseline_et_data['total_time']:.3f}s")
+                print(f"\nbaseline evm ET sweep total time , , {baseline_et_data['total_time']:.3f}")
+                print("This includes ET configuration and delay sweep\n")
 
             total_evm_time = time() - total_evm_start
-            print(f"Total baseline evm time, , {total_evm_time:.3f}s")
-            print("This includes power servo EVM and ACLR measurements")
-            logger.info(f"Baseline done: Power={vsa_power}, EVM={evm_value}, Total={total_evm_time:.3f}s")
+            print(f"Total baseline evm time, , {total_evm_time:.3f}")
+            print("This includes power servo ET sweep EVM and ACLR measurements")
+            logger.info(f"Baseline done: Power={vsa_power}, EVM={evm_value}, Total={total_evm_time:.3f}")
 
             return (vsa_power, evm_value, evm_time, chan_pow, adj_chan_lower, adj_chan_upper,
                     aclr_time, total_evm_time, servo_loops, ext_servo_time, k18_time, baseline_et_data)
@@ -302,27 +311,35 @@ class VSA:
                                use_k18_power_servo=None, et=None):
         """Run Polynomial DPD + measurement."""
         try:
+            print(f"\n------ polynomial dpd Test ------")
             poly_total_start = time()
 
             # Amplifier app setup
+            print(f"\n------ K18 setup ------")
             amp_setup_start = time()
             self.write_command_opc('INST:SEL "Amplifier"')
-            self.instr.query('CONF:GEN:CONN:STAT ON; *OPC?')
-            self.instr.query('CONF:GEN:CONT:STAT ON; *OPC?')
-            self.instr.query('CONF:SETT; *OPC?')
-            self.instr.query(':CONF:REFS:CGW:READ; *OPC?')
+            #  self.instr.query('CONF:GEN:CONN:STAT ON; *OPC?')
+            #  self.instr.query('CONF:GEN:CONT:STAT ON; *OPC?')
+            #  self.instr.write('CONF:SETT')
+            #  self.instr.query(':CONF:REFS:CGW:READ; *OPC?')
             amp_app_setup_time = time() - amp_setup_start
-            print(f"amp app setup time, , {amp_app_setup_time:.3f}s")
+            print(f"amp app setup time, , {amp_app_setup_time:.3f}")
+            print("This includes amplifier app setup before polynomial DPD calculation")
 
             # Polynomial DPD setup and calculation
+            print(f"\n------ polynomial dpd setup and calculation ------")
             poly_setup_start = time()
             self.instr.query('CONF:DPD:SHAP:MODE POLY; *OPC?')
+            self.instr.query('INIT:IMM; *OPC?')
             self.instr.query('CONF:DPD:UPD; *OPC?')
+            self.instr.query(':CONF:DPD:AMAM:STAT ON; *OPC?')
+            self.instr.query(':CONF:DPD:AMPM:STAT ON; *OPC?')
             poly_setup_time = time() - poly_setup_start
-            print(f"Polynomial DPD setup time, , {poly_setup_time:.3f}s")
+            print(f"Polynomial DPD setup time, , {poly_setup_time:.3f}")
             print("This includes amplifier app setup poly DPD calculation and update")
 
             # Power servo
+            print(f"\n------ polynomial dpd power servo ------")
             poly_power_servo_start = time()
             use_power_servo, use_k18_power_servo = self._resolve_servo_flags(use_power_servo, use_k18_power_servo)
             poly_servo_loops, poly_ext_servo_time, poly_k18_time = self._run_servos(
@@ -330,10 +347,11 @@ class VSA:
                 use_power_servo, use_k18_power_servo
             )
             poly_power_servo_time = time() - poly_power_servo_start
-            print(f"Polynomial DPD Servo loop time, , {poly_power_servo_time:.3f}s")
-            print(f"use nrx {use_power_servo}, use K18 {use_k18_power_servo}, servo iterations {poly_servo_loops}")
+            print(f"use nrx {use_power_servo}\nuse K18 {use_k18_power_servo}\nservo iterations {poly_servo_loops}\n")
+            print(f"Polynomial DPD Servo loop time, , {poly_power_servo_time:.3f}")
 
             # EVM measurement
+            print(f"\n------ measure polynomial dpd evm aclr & power ------")
             evm_start = time()
             self.instr.query('INST:SEL "5G NR"; *OPC?')
             self.instr.query('CONF:NR5G:MEAS EVM; *OPC?')
@@ -341,7 +359,10 @@ class VSA:
             poly_power = float(self.instr.query('FETC:CC1:ISRC:FRAM:SUMM:POW:AVERage?'))
             poly_evm = float(self.instr.query('FETC:CC1:ISRC:FRAM:SUMM:EVM:ALL:AVERage?'))
             poly_time = time() - evm_start
-            print(f"Polynomial DPD EVM and VSA Power time, , {poly_time:.3f}s")
+            print("poly dpd evm = {:.3f} dB".format(poly_evm))
+            print("5G app power after poly dpd = {:.3f} dBm".format(poly_power))
+
+            print(f"Polynomial DPD EVM and VSA Power time, , {poly_time:.3f}")
             print("This includes VSA power and EVM measurement after polynomial DPD applied")
 
             # ACLR measurement
@@ -351,16 +372,18 @@ class VSA:
             aclr_list = self.instr.query('CALC:MARK:FUNC:POW:RES? ACP')
             poly_chan_pow, poly_adj_chan_lower, poly_adj_chan_upper = [float(x) for x in aclr_list.split(',')[:3]]
             poly_aclr_time = time() - aclr_start
-            print(f"Polynomial DPD ACLR time, , {poly_aclr_time:.3f}s")
+            print("5G app channel power after poly dpd = {:.3f} dBm".format(poly_chan_pow))
+            print(f"Polynomial DPD ACLR time, , {poly_aclr_time:.3f}")
             print("This includes VSA ACLR measurement after polynomial DPD applied and power servo")
 
             # Envelope Tracking if enabled
+            print(f"\n------ polynomial dpd ET  ------")
             poly_et_data = self._perform_et_sweep(et)
             if poly_et_data:
                 print(f"Polynomial DPD ET total time (incl. config), , {poly_et_data['total_time']:.3f}s")
 
             poly_total_time = time() - poly_total_start
-            print(f"Polynomial dpd evm time, , {poly_total_time:.3f}s")
+            print(f"Polynomial dpd evm time, , , , {poly_total_time:.3f}")
             print("This includes amplifier app setup poly DPD calculation power servo EVM and ACLR measurements")
             logger.info(f"Polynomial DPD done: Power={poly_power}, EVM={poly_evm}, Total={poly_total_time:.3f}s")
 

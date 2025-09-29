@@ -31,7 +31,7 @@ base_path = os.path.dirname(__file__)
 log_dir = os.path.join(base_path, 'logs')
 os.makedirs(log_dir, exist_ok=True)
 
-
+print("Test description, , individual test blocks, test block totals, not added to total time")
 # --------------------------------------------------------------
 # Main Sweep Routine
 # --------------------------------------------------------------

@@ -9,7 +9,6 @@ from time import time, sleep
 
 logger = logging.getLogger(__name__)
 
-
 class ET:
     def __init__(self, vsg, et_delay_shifts=10, vsa=None, pm=None):
         """
@@ -73,6 +72,7 @@ class ET:
             delays = []
             evms = []
             step_times = []
+            evm_times = []  # Store time for each get_evm call
             current_delay = start_delay
 
             # Perform sweep: iterate through delay values and measure EVM
@@ -80,28 +80,39 @@ class ET:
                 step_start_time = time()
 
                 # Set envelope tracking delay
-                self.vsg.vsg.query(f"SOURce1:IQ:OUTPut:ANALog:ENVelope:DELay {current_delay}; *OPC?")
+                self.vsg.vsg.write(f"SOURce1:IQ:OUTPut:ANALog:ENVelope:DELay {current_delay}")
 
                 # Trigger measurement on VSA
-                self.vsa.instr.query('INIT:IMM; *OPC?')
+                self.vsa.instr.write('INIT:IMM')
 
-                # Get EVM measurement
-                evm = self.vsa.get_evm()
+                # Get EVM measurement and time
+                evm, evm_time = self.vsa.get_evm()
 
                 # Store results
                 delays.append(current_delay)
                 evms.append(evm)
+                evm_times.append(evm_time)
                 step_time = time() - step_start_time
                 step_times.append(step_time)
-
-                print(f"ET Step {i}: Delay={current_delay:.2e}s, EVM={evm:.2f}dB, Time={step_time:.3f}s")
 
                 # Increment delay for next iteration
                 current_delay += step
 
             et_total_loop_time = time() - et_delay_start_time
-            print(f"Total ET delay sweep loop time, , {et_total_loop_time:.3f}")
-            print("This includes all delay shifts and EVM measurements")
+            num_loops = len(step_times)
+            avg_loop_time = et_total_loop_time / num_loops if num_loops > 0 else 0
+            total_evm_time = sum(evm_times)
+            avg_evm_time = total_evm_time / num_loops if num_loops > 0 else 0
+            avg_evm = sum(evms) / num_loops if num_loops > 0 else 0
+
+            print("ET total loop time, , {:.3f}".format(et_total_loop_time))
+
+            print(
+                f"\nET Delay Sweep: Total time={et_total_loop_time:.3f}s\nNumber of loops={num_loops}\n"
+                f"Average loop time={avg_loop_time:.3f}s\nAverage get_evm time={avg_evm_time:.3f}s\n"
+                f"Average EVM={avg_evm:.2f}dB\n"
+            )
+            print ("\nthis includes time to set delay trigger VSA and get EVM measurement\n")
 
             # Disable ET after sweep
             disable_start = time()
