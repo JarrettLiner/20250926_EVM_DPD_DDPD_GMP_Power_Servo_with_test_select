@@ -52,10 +52,13 @@ class PowerServo:
             servo_iterations (int): Max number of iterations.
 
         Returns:
-            tuple: (servo_iterations, servo_settle_time)
+            tuple: (servo_iterations, servo_settle_time, current_output)
         """
+        print(f"\n------ Begin NRX Power Servo ------")
         self.max_iterations = servo_iterations
-        return self.servo_power(freq_ghz, target_output, expected_gain)
+        loops, settle_time, current_output = self.servo_power(freq_ghz, target_output, expected_gain)
+        print(f"DEBUG: current_output from servo_power in external_servo: {current_output:.3f}")
+        return loops, settle_time, current_output
 
     def servo_power(self, freq_ghz, target_output, expected_gain):
         """
@@ -68,7 +71,7 @@ class PowerServo:
         measured_in, measured_out = self.pm.measure()
         measured_gain = measured_out - measured_in
         self.logger.info(f"Measured DUT gain: {measured_gain:.3f} dB")
-        print(f"Measured gain in dB: {measured_gain:.3f}")
+        print(f"Measured gain,{measured_gain:.3f} dB")
 
         # Initial input power estimate
         input_power = target_output - measured_gain
@@ -99,8 +102,9 @@ class PowerServo:
                 f"NRX servo did not converge within {self.max_iterations} iterations "
                 f"at {freq_ghz} GHz (time={servo_settle_time:.3f}s)"
             )
-
-        return servo_loops, servo_settle_time
+        print("NRX measured power after servo loops, {:.3f}".format(current_output))
+        print("NRX power servo loops, {}".format(servo_loops))
+        return servo_loops, servo_settle_time, current_output
 
     # ----------------------------------------------------------
     # Internal K18 Power Servo
@@ -117,6 +121,7 @@ class PowerServo:
         Returns:
             tuple: (servo_iterations, k18_servo_time)
         """
+        print(f"\n------ Begin K18 power Servo ------")
         k18_start = time()
 
         try:

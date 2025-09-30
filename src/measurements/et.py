@@ -105,14 +105,14 @@ class ET:
             avg_evm_time = total_evm_time / num_loops if num_loops > 0 else 0
             avg_evm = sum(evms) / num_loops if num_loops > 0 else 0
 
-            print("ET total loop time, , {:.3f}".format(et_total_loop_time))
+            #  print("ET total loop time, , {:.3f}".format(et_total_loop_time))
 
             print(
-                f"\nET Delay Sweep: Total time={et_total_loop_time:.3f}s\nNumber of loops={num_loops}\n"
-                f"Average loop time={avg_loop_time:.3f}s\nAverage get_evm time={avg_evm_time:.3f}s\n"
-                f"Average EVM={avg_evm:.2f}dB\n"
+                f"\nET Iteration Total time, , ,{et_total_loop_time:.3f}\nNumber of loops,{num_loops}\n"
+                f"Average loop time,{avg_loop_time:.3f}s\nAverage get_evm time,{avg_evm_time:.3f}s\n"
+                f"Average EVM,{avg_evm:.2f}dB"
             )
-            print ("\nthis includes time to set delay trigger VSA and get EVM measurement\n")
+            print ("this includes time to set delay trigger VSA and get EVM measurement")
 
             # Disable ET after sweep
             disable_start = time()

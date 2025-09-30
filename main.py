@@ -26,12 +26,28 @@ from src.measurements.et import ET  # Import ET class for envelope tracking
 # --------------------------------------------------------------
 # Logging Setup
 # --------------------------------------------------------------
+
 logger = logging.getLogger(__name__)
 base_path = os.path.dirname(__file__)
 log_dir = os.path.join(base_path, 'logs')
 os.makedirs(log_dir, exist_ok=True)
 
-print("Test description, , individual test blocks, test block totals, not added to total time")
+os.system("")  # Enables ANSI escape codes in Windows cmd.exe
+
+# Configure logging
+#  log_dir = os.path.join(os.path.dirname(__file__), 'logs')
+#  os.makedirs(log_dir, exist_ok=True)
+'''
+logging.basicConfig(
+    filename=os.path.join(log_dir, 'test_output.log'),
+    level=logging.INFO,
+    format='%(message)s'
+)
+'''
+# Redirect print to log
+#  print = logging.info
+
+print("Test description,Test Data,test block time,test block totals,test function total,test frequency total,***not added to total time***")
 # --------------------------------------------------------------
 # Main Sweep Routine
 # --------------------------------------------------------------
@@ -154,9 +170,14 @@ def run_sweep():
             # -------------------------
             # Configure instruments with calibration offsets
             # -------------------------
+            print(f"\n--- Begin Instrument Configure for current Frequency ---")
+            intstrument_config_start = time()
             pm.configure(freq, input_offset, output_offset)
             vsg.configure(freq, target_output - expected_gain, vsg_offset)
-            vsa.configure(freq, vsa_offset)
+            vsa.configure(freq, vsa_offset, target_output )
+            pm.configure(freq, input_offset, output_offset)
+            instrument_config_time = time() - intstrument_config_start
+            print(f"Total Instrument configuration time, , , {instrument_config_time:.3f}")
 
             # -------------------------
             # Baseline measurement (before DPD)
@@ -166,7 +187,7 @@ def run_sweep():
             freq_str = f"{freq:.0f}"
 
             (vsa_power, evm_value, evm_time, chan_pow, adj_chan_lower, adj_chan_upper, aclr_time, total_evm_time, servo_loops,
-             ext_servo_time, k18_time, baseline_et_data) = vsa.measure_evm(
+             ext_servo_time, k18_time, baseline_et_data, baseline_current_output) = vsa.measure_evm(
                 freq_str, vsa_offset, target_output, servo_iterations, freq_ghz, expected_gain, power_servo, et=et
             )
 
@@ -179,13 +200,14 @@ def run_sweep():
                  poly_chan_pow, poly_adj_chan_lower,
                  poly_adj_chan_upper, poly_aclr_time,
                  poly_total_time, poly_servo_loops,
-                 poly_ext_servo_time, poly_k18_time, poly_et_data) = vsa.perform_polynomial_dpd(
+                 poly_ext_servo_time, poly_k18_time, poly_et_data, poly_dpd_current_output) = vsa.perform_polynomial_dpd(
                     freq_str, vsa_offset, target_output, servo_iterations,
                     freq_ghz, expected_gain, power_servo, et=et
                 )
+                print(f"DEBUG: poly_dpd_current_output in run_sweep: {poly_dpd_current_output:.3f}")
             else:
                 poly_power = poly_evm = poly_time = poly_chan_pow = poly_adj_chan_lower = poly_adj_chan_upper = None
-                poly_aclr_time = poly_total_time = poly_servo_loops = poly_ext_servo_time = poly_k18_time = None
+                poly_aclr_time = poly_total_time = poly_servo_loops = poly_ext_servo_time = poly_k18_time = poly_dpd_current_output = None
 
             # -------------------------
             # Direct DPD measurement (formerly Iterative DPD)
@@ -225,7 +247,7 @@ def run_sweep():
             # Collect and store results for this frequency
             # -------------------------
             elapsed = time() - start_time
-            print(f"Total measurement time at {freq_ghz} GHz:, , , {elapsed:.3f}")
+            print(f"\nTotal measurement time at {freq_ghz} GHz:, , , , , {elapsed:.3f}")
 
             result = {
                 # Instrument setup times
@@ -237,30 +259,30 @@ def run_sweep():
                 "Target Output Power (dBm)": target_output,
                 "Servo Iterations": servo_loops,
                 "Servo Settle Time (s)": ext_servo_time,
+                "Measured Output Power after Servo (dBm)": baseline_current_output,
 
                 # Baseline measurements
-                "Corrected Input Power (dBm)": corrected_input,
-                "Corrected Output Power (dBm)": corrected_output,
-                "VSA Output Power (dBm)": vsa_power,
+                "VSA 5G App Power (dBm)": vsa_power,
                 "EVM (dB)": evm_value,
                 "EVM Measure Time (s)": evm_time,
-                "Channel Power (dBm)": chan_pow,
+                "ACLR Channel Power (dBm)": chan_pow,
                 "Lower Adjacent ACLR (dB)": adj_chan_lower,
                 "Upper Adjacent ACLR (dB)": adj_chan_upper,
                 "ACLR Measure Time (s)": aclr_time,
 
                 # Polynomial DPD results (formerly Single DPD)
-                "Polynomial DPD Power (dBm)": poly_power,
+                "Polynomial DPD Servo Loops": poly_servo_loops,
+                "Polynomial DPD Ext Servo Time (s)": poly_ext_servo_time,
+                "Polynomial DPD K18 Servo Time (s)": poly_k18_time,
+                "Measured Output Power after PolyDPD Servo (dBm)": poly_dpd_current_output,
+                "VSA 5G App PolyDPD Power (dBm)": poly_power,
                 "Polynomial DPD EVM (dB)": poly_evm,
-                "Polynomial DPD Measure Time (s)": poly_time,
+                "Polynomial DPD EVM Measure Time (s)": poly_time,
                 "Polynomial DPD Channel Power (dBm)": poly_chan_pow,
                 "Polynomial DPD Lower Adjacent ACLR (dB)": poly_adj_chan_lower,
                 "Polynomial DPD Upper Adjacent ACLR (dB)": poly_adj_chan_upper,
                 "Polynomial DPD ACLR Measure Time (s)": poly_aclr_time,
-                "Polynomial DPD Total Time (s)": poly_total_time,
-                "Polynomial DPD Servo Loops": poly_servo_loops,
-                "Polynomial DPD Ext Servo Time (s)": poly_ext_servo_time,
-                "Polynomial DPD K18 Servo Time (s)": poly_k18_time,
+                "Polynomial DPD Total Meaasure Time (s)": poly_total_time,
 
                 # Direct DPD results (formerly Iterative DPD)
                 "Direct DPD Power (dBm)": direct_power,

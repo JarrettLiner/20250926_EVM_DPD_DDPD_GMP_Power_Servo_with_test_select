@@ -1,0 +1,197 @@
+C:\Users\LINER\Documents\PycharmProjects\20250926_EVM_DPD_DDPD_GMP_Power_Servo_with_test_select\.venv\Scripts\python.exe C:\Users\LINER\Documents\PycharmProjects\20250926_EVM_DPD_DDPD_GMP_Power_Servo_with_test_select\main.py
+VSG setup time, , , , 1.209
+This includes the time to load the waveform file
+not included in the total test time
+VSA setup file:
+ C:\R_S\instr\user\Qorvo\5GNR_UL_100MHz_256QAM_60kHz_135RB_0RBO_fullframe
+Total VSA setup time: 16.288
+This includes reset
+retieveing the setup parameters
+from the test_input file
+and loading of the setup file
+update the poly DPD calculation
+not included in the total test time
+VSG configure time, , 0.089
+This includes the time to set frequency power and offsets
+VSA configure time, , 0.183
+This includes the time to set frequency and offsets
+
+------ Baseline EVM Test ------
+
+------ power servo ------
+Measured gain in dB: 18.429
+External servo time, , 0.847
+use nrx True
+use K18 False
+servo iterations 1
+
+------ measure baseline EVM aclr & power ------
+evm = -45.747 dB
+5G app power = 6.121 dBm
+Baseline EVM and VSA Power time, , 0.849
+This includes VSA power and EVM measurement
+5G app channel power = 6.257 dBm
+Baseline ACLR time, , 0.690
+This includes VSA ACLR measurement
+
+------ Baseline EVM ET  ------
+ET configure time, , 0.004
+This includes the time to enable ET and set delay and shaping mode
+ET total loop time, , 2.673
+
+ET Delay Sweep: Total time=2.673s
+Number of loops=15
+Average loop time=0.178s
+Average get_evm time=0.178s
+Average EVM=-45.75dB
+
+
+this includes time to set delay trigger VSA and get EVM measurement
+
+ET disable time, , 0.001
+
+baseline evm ET sweep total time , , 2.778
+This includes ET configuration and delay sweep
+
+Total baseline evm time, , 5.167
+This includes power servo ET sweep EVM and ACLR measurements
+
+------ polynomial dpd Test ------
+
+------ K18 setup ------
+amp app setup time, , 0.016
+This includes amplifier app setup before polynomial DPD calculation
+
+------ polynomial dpd setup and calculation ------
+Polynomial DPD setup time, , 2.643
+This includes amplifier app setup poly DPD calculation and update
+
+------ polynomial dpd power servo ------
+Measured gain in dB: 18.436
+External servo time, , 1.254
+use nrx True
+use K18 False
+servo iterations 2
+
+Polynomial DPD Servo loop time, , 1.254
+
+------ measure polynomial dpd evm aclr & power ------
+poly dpd evm = -51.235 dB
+5G app power after poly dpd = 6.158 dBm
+Polynomial DPD EVM and VSA Power time, , 0.971
+This includes VSA power and EVM measurement after polynomial DPD applied
+5G app channel power after poly dpd = 6.282 dBm
+Polynomial DPD ACLR time, , 0.697
+This includes VSA ACLR measurement after polynomial DPD applied and power servo
+
+------ polynomial dpd ET  ------
+ET configure time, , 0.003
+This includes the time to enable ET and set delay and shaping mode
+ET total loop time, , 1.713
+
+ET Delay Sweep: Total time=1.713s
+Number of loops=15
+Average loop time=0.114s
+Average get_evm time=0.114s
+Average EVM=-51.23dB
+
+
+this includes time to set delay trigger VSA and get EVM measurement
+
+ET disable time, , 0.001
+Polynomial DPD ET total time (incl. config), , 1.810s
+Polynomial dpd evm time, , , , 7.392
+This includes amplifier app setup poly DPD calculation power servo EVM and ACLR measurements
+VSG configure time, , 0.314
+This includes the time to set frequency power and offsets
+VSA configure time, , 0.089
+This includes the time to set frequency and offsets
+
+------ Baseline EVM Test ------
+
+------ power servo ------
+Measured gain in dB: 18.404
+External servo time, , 0.766
+use nrx True
+use K18 False
+servo iterations 1
+
+------ measure baseline EVM aclr & power ------
+evm = -45.842 dB
+5G app power = 6.177 dBm
+Baseline EVM and VSA Power time, , 0.834
+This includes VSA power and EVM measurement
+5G app channel power = 6.280 dBm
+Baseline ACLR time, , 0.693
+This includes VSA ACLR measurement
+
+------ Baseline EVM ET  ------
+ET configure time, , 0.004
+This includes the time to enable ET and set delay and shaping mode
+ET total loop time, , 0.749
+
+ET Delay Sweep: Total time=0.749s
+Number of loops=15
+Average loop time=0.050s
+Average get_evm time=0.050s
+Average EVM=-45.84dB
+
+
+this includes time to set delay trigger VSA and get EVM measurement
+
+ET disable time, , 0.001
+
+baseline evm ET sweep total time , , 0.872
+This includes ET configuration and delay sweep
+
+Total baseline evm time, , 3.166
+This includes power servo ET sweep EVM and ACLR measurements
+
+------ polynomial dpd Test ------
+
+------ K18 setup ------
+amp app setup time, , 0.045
+This includes amplifier app setup before polynomial DPD calculation
+
+------ polynomial dpd setup and calculation ------
+Polynomial DPD setup time, , 2.583
+This includes amplifier app setup poly DPD calculation and update
+
+------ polynomial dpd power servo ------
+Measured gain in dB: 18.411
+External servo time, , 0.779
+use nrx True
+use K18 False
+servo iterations 1
+
+Polynomial DPD Servo loop time, , 0.779
+
+------ measure polynomial dpd evm aclr & power ------
+poly dpd evm = -51.274 dB
+5G app power after poly dpd = 6.122 dBm
+Polynomial DPD EVM and VSA Power time, , 0.984
+This includes VSA power and EVM measurement after polynomial DPD applied
+5G app channel power after poly dpd = 6.231 dBm
+Polynomial DPD ACLR time, , 0.700
+This includes VSA ACLR measurement after polynomial DPD applied and power servo
+
+------ polynomial dpd ET  ------
+ET configure time, , 0.003
+This includes the time to enable ET and set delay and shaping mode
+ET total loop time, , 1.709
+
+ET Delay Sweep: Total time=1.709s
+Number of loops=15
+Average loop time=0.114s
+Average get_evm time=0.114s
+Average EVM=-51.27dB
+
+
+this includes time to set delay trigger VSA and get EVM measurement
+
+ET disable time, , 0.001
+Polynomial DPD ET total time (incl. config), , 1.812s
+Polynomial dpd evm time, , , , 6.904
+This includes amplifier app setup poly DPD calculation power servo EVM and ACLR measurements
+
+Process finished with exit code 0

@@ -57,6 +57,7 @@ class PowerMeter:
             output_offset (float): Output power offset in dB.
         """
         try:
+            power_meter_config_start = time()
             command = (
                 f':SENS1:FREQ {freq};'
                 f':SENS2:FREQ {freq};'
@@ -67,6 +68,9 @@ class PowerMeter:
                 f'*OPC?'
             )
             self.instr.query(command)
+            power_meter_config_time = time() - power_meter_config_start
+            print(f"PowerMeter configure time, , {power_meter_config_time:.3f}")
+            print("This includes the time to set frequency and offsets")
             logger.info(f"PowerMeter configured for {freq} Hz with offsets {input_offset}, {output_offset}")
         except Exception as e:
             logger.error(f"PowerMeter configuration failed: {str(e)}")

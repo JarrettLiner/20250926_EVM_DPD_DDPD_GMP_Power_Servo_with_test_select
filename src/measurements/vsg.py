@@ -80,7 +80,7 @@ class VSG:
         self.vsg.query('*OPC?')  # Wait until reset complete
         self.vsg.query('SOURce1:CORRection:OPTimize:RF:CHARacteristics EVM; *OPC?')
         self.vsg.query('OUTPut1:AMODe AUTO; *OPC?')  # Set ATTN mode to AUTO
-        self.vsg.query(f'SOURce1:POWer:LIM:AMPL {10}; *OPC?')  # Set power limit to +10dBm
+        self.vsg.query(f'SOURce1:POWer:LIM:AMPL {20}; *OPC?')  # Set power limit to +10dBm
         self.vsg.query(f'SOURce1:POWer:ATTenuation:DIGital {-3.522}; *OPC?')  # Set digital attenuation
 
         # Load predefined 5G NR waveform file
@@ -91,8 +91,8 @@ class VSG:
 
         # Track and log setup time
         self.setup_time = time() - start_time
-        print(f"VSG setup time, , , , {self.setup_time:.3f}")
-        print("This includes the time to load the waveform file\nnot included in the total test time")
+        print(f"VSG setup time, , , , , , {self.setup_time:.3f}\nThis includes the time to load the waveform file\nnot included in the total test time")
+        #  print("This includes the time to load the waveform file\nnot included in the total test time")
         logger.info(f"VSG initialized in {self.setup_time:.3f}s using signal_bandwidth '{signal_bandwidth}' and frame_type '{frame_type}'")
 
     # ----------------------------------------------------------
@@ -124,7 +124,7 @@ class VSG:
 
         # Set output power
         self.vsg.query(f':SOUR1:POW:LEV:IMM:AMPL {initial_power}; *OPC?')
-        self.vsg.query(f'SOURce1:POWer:LIM:AMPL {10}; *OPC?')  # Set power limit to +10dBm
+        self.vsg.query(f'SOURce1:POWer:LIM:AMPL {20}; *OPC?')  # Set power limit to +10dBm
 
         # Enable baseband ARB
         #  self.vsg.query('SOURce1:BB:ARBitrary:STATe 1; *OPC?')  # Ensure ARB state is enabled
@@ -133,8 +133,8 @@ class VSG:
         #  self.vsg.query(':OUTP1:STAT 1; *OPC?')
         self.vsg.query('*OPC?')  # Wait until all operations complete
         vsg_configure_time = time() - vsg_configure_start_time
-        print(f"VSG configure time, , {vsg_configure_time:.3f}")
-        print("This includes the time to set frequency power and offsets")
+        print(f"VSG configure time, , {vsg_configure_time:.3f}\nThis includes the time to set frequency power and offsets")
+        #  print("This includes the time to set frequency power and offsets")
     # ----------------------------------------------------------
     # Power adjustment
     # ----------------------------------------------------------
