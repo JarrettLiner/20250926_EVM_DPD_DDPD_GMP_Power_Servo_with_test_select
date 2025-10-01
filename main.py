@@ -128,6 +128,7 @@ def run_sweep():
         round(float(row["Center Frequency (GHz)"]), 3): {
             "vsg_offset": float(row["VSG Offset (dB)"]),
             "vsa_offset": float(row["VSA Offset (dB)"]),
+            "vsa_ch_pwr_offset": float(row ["VSA Ch Pwr Offset (dB)"]),
             "input_offset": float(row["Input Power Offset (dB)"]),
             "output_offset": float(row["Output Power Offset (dB)"])
         } for _, row in cal_df.iterrows()
@@ -164,6 +165,7 @@ def run_sweep():
             offsets = cal_dict[freq_ghz]
             vsg_offset = offsets["vsg_offset"]
             vsa_offset = offsets["vsa_offset"]
+            vsa_ch_pwr_offset = offsets["vsa_ch_pwr_offset"]
             input_offset = offsets["input_offset"]
             output_offset = offsets["output_offset"]
 
@@ -174,7 +176,7 @@ def run_sweep():
             intstrument_config_start = time()
             pm.configure(freq, input_offset, output_offset)
             vsg.configure(freq, target_output - expected_gain, vsg_offset)
-            vsa.configure(freq, vsa_offset, target_output )
+            vsa.configure(freq, vsa_offset, target_output)
             pm.configure(freq, input_offset, output_offset)
             instrument_config_time = time() - intstrument_config_start
             print(f"Total Instrument configuration time, , , {instrument_config_time:.3f}")
@@ -188,7 +190,7 @@ def run_sweep():
 
             (vsa_power, evm_value, evm_time, chan_pow, adj_chan_lower, adj_chan_upper, aclr_time, total_evm_time, servo_loops,
              ext_servo_time, k18_time, baseline_et_data, baseline_current_output) = vsa.measure_evm(
-                freq_str, vsa_offset, target_output, servo_iterations, freq_ghz, expected_gain, power_servo, et=et
+                freq_str, vsa_offset, vsa_ch_pwr_offset, target_output, servo_iterations, freq_ghz, expected_gain, power_servo, et=et
             )
 
             # -------------------------
@@ -200,11 +202,13 @@ def run_sweep():
                  poly_chan_pow, poly_adj_chan_lower,
                  poly_adj_chan_upper, poly_aclr_time,
                  poly_total_time, poly_servo_loops,
-                 poly_ext_servo_time, poly_k18_time, poly_et_data, poly_dpd_current_output) = vsa.perform_polynomial_dpd(
+                 poly_ext_servo_time, poly_k18_time, poly_et_data,
+                 poly_dpd_current_output) = vsa.perform_polynomial_dpd(
                     freq_str, vsa_offset, target_output, servo_iterations,
+                    # Fix: Remove vsa_ch_pwr_offset, put target_output here
                     freq_ghz, expected_gain, power_servo, et=et
                 )
-                print(f"DEBUG: poly_dpd_current_output in run_sweep: {poly_dpd_current_output:.3f}")
+                #  print(f"DEBUG: poly_dpd_current_output in run_sweep: {poly_dpd_current_output:.3f}")
             else:
                 poly_power = poly_evm = poly_time = poly_chan_pow = poly_adj_chan_lower = poly_adj_chan_upper = None
                 poly_aclr_time = poly_total_time = poly_servo_loops = poly_ext_servo_time = poly_k18_time = poly_dpd_current_output = None
@@ -219,7 +223,7 @@ def run_sweep():
                  direct_chan_pow, direct_adj_chan_lower, direct_adj_chan_upper,
                  direct_aclr_time, direct_total_time,
                  direct_servo_loops, direct_ext_servo_time, direct_k18_time, direct_et_data) = vsa.perform_direct_dpd(
-                    freq_str, vsa_offset, target_output, ddpd_iterations,
+                    freq_str, vsa_offset, vsa_ch_pwr_offset, target_output, ddpd_iterations,
                     servo_iterations, freq_ghz, expected_gain, power_servo, et=et
                 )
             else:
@@ -236,7 +240,7 @@ def run_sweep():
                  gmp_chan_pow, gmp_adj_chan_lower, gmp_adj_chan_upper,
                  gmp_aclr_time, gmp_total_time,
                  gmp_servo_loops, gmp_ext_servo_time, gmp_k18_time, gmp_et_data) = vsa.perform_gmp_dpd(
-                    freq_str, vsa_offset, target_output, ddpd_iterations,
+                    freq_str, vsa_offset, vsa_ch_pwr_offset, target_output, ddpd_iterations,
                     servo_iterations, freq_ghz, expected_gain, power_servo, et=et
                 )
             else:
@@ -323,27 +327,31 @@ def run_sweep():
 
                 # Add baseline ET data
                 if baseline_et_data:
-                    result["Baseline ET Delays (s)"] = ", ".join(f"{d:.2e}" for d in baseline_et_data["delays"])
-                    result["Baseline ET EVMs (dB)"] = ", ".join(f"{e:.2f}" for e in baseline_et_data["evms"])
-                    result["Baseline ET Total Time (s)"] = round(baseline_et_data["total_time"], 3)
+                    result["Baseline ET Average EVM (dB)"] = baseline_et_data["avg_evm"]
+                    result["Baseline ET Average Loop Time (s)"] = baseline_et_data["avg_loop_time"]
+                    result["Baseline ET Total Time (s)"] = baseline_et_data["total_time"]
+                    result["Baseline ET Number of Loops"] = baseline_et_data["num_loops"]
 
                 # Add polynomial DPD ET data
                 if poly_et_data:
-                    result["Polynomial DPD ET Delays (s)"] = ", ".join(f"{d:.2e}" for d in poly_et_data["delays"])
-                    result["Polynomial DPD ET EVMs (dB)"] = ", ".join(f"{e:.2f}" for e in poly_et_data["evms"])
-                    result["Polynomial DPD ET Total Time (s)"] = round(poly_et_data["total_time"], 3)
+                    result["Polynomial DPD ET Average EVM (dB)"] = poly_et_data["avg_evm"]
+                    result["Polynomial DPD ET Average Loop Time (s)"] = poly_et_data["avg_loop_time"]
+                    result["Polynomial DPD ET Total Time (s)"] = poly_et_data["total_time"]
+                    result["Polynomial DPD ET Number of Loops"] = poly_et_data["num_loops"]
 
                 # Add direct DPD ET data
                 if direct_et_data:
-                    result["Direct DPD ET Delays (s)"] = ", ".join(f"{d:.2e}" for d in direct_et_data["delays"])
-                    result["Direct DPD ET EVMs (dB)"] = ", ".join(f"{e:.2f}" for e in direct_et_data["evms"])
-                    result["Direct DPD ET Total Time (s)"] = round(direct_et_data["total_time"], 3)
+                    result["Direct DPD ET Average EVM (dB)"] = direct_et_data["avg_evm"]
+                    result["Direct DPD ET Average Loop Time (s)"] = direct_et_data["avg_loop_time"]
+                    result["Direct DPD ET Total Time (s)"] = direct_et_data["total_time"]
+                    result["Direct DPD ET Number of Loops"] = direct_et_data["num_loops"]
 
                 # Add GMP ET data
                 if gmp_et_data:
-                    result["GMP ET Delays (s)"] = ", ".join(f"{d:.2e}" for d in gmp_et_data["delays"])
-                    result["GMP ET EVMs (dB)"] = ", ".join(f"{e:.2f}" for e in gmp_et_data["evms"])
-                    result["GMP ET Total Time (s)"] = round(gmp_et_data["total_time"], 3)
+                    result["GMP ET Average EVM (dB)"] = gmp_et_data["avg_evm"]
+                    result["GMP ET Average Loop Time (s)"] = gmp_et_data["avg_loop_time"]
+                    result["GMP ET Total Time (s)"] = gmp_et_data["total_time"]
+                    result["GMP ET Number of Loops"] = gmp_et_data["num_loops"]
 
             results.append(result)
             print(user_comment)

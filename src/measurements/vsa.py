@@ -201,7 +201,7 @@ class VSA:
         k18_time = 0
         current_output = None
 
-        print(f"DEBUG: use_power_servo: {use_power_servo}, use_k18_power_servo: {use_k18_power_servo}")
+        #  print(f"DEBUG: use_power_servo: {use_power_servo}, use_k18_power_servo: {use_k18_power_servo}")
         if use_power_servo:
             result = power_servo.external_servo(freq_ghz, target_output, expected_gain, servo_iterations)
             #  print(f"DEBUG: Raw result from external_servo: {result}")
@@ -230,19 +230,20 @@ class VSA:
         et_starting_delay = test_config.get("Sweep_Measurement", {}).get("et_starting_delay", 0.0)
         et_delay_step = test_config.get("Sweep_Measurement", {}).get("et_delay_step", 0.0)
 
-        et_delays, et_evms, et_step_times, et_total_loop_time = et.et_delay_evm(et_starting_delay, et_delay_step)
+        et_data = et.et_delay_evm(et_starting_delay, et_delay_step)
         et_total_time = time() - et_start
 
         return {
-            "delays": et_delays,
-            "evms": et_evms,
-            "total_time": et_total_time
+            "avg_evm": et_data["avg_evm"],
+            "avg_loop_time": et_data["avg_loop_time"],
+            "total_time": et_total_time,
+            "num_loops": et_data["num_loops"]
         }
 
     # ----------------------------------------------------------
     # Baseline EVM Measurement
     # ----------------------------------------------------------
-    def measure_evm(self, freq_str, vsa_offset, target_output, servo_iterations, freq_ghz,
+    def measure_evm(self, freq_str, vsa_offset, vsa_ch_pwr_offset, target_output, servo_iterations, freq_ghz,
                     expected_gain, power_servo, use_power_servo=None, use_k18_power_servo=None, et=None):
         """Measure baseline EVM and ACLR (no DPD)."""
         try:
@@ -270,6 +271,7 @@ class VSA:
             print(f"\n------ Measure Baseline EVM ACLR & 5Gapp Power ------")
             evm_aclr_power_start = time()
             evm_start = time()
+            #  self.instr.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV:OFFS {vsa_offset:.2f}')
             self.instr.query('INIT:IMM; *OPC?')
             vsa_power = float(self.instr.query('FETC:CC1:ISRC:FRAM:SUMM:POW:AVERage?'))
             evm_value = float(self.instr.query('FETC:CC1:ISRC:FRAM:SUMM:EVM:ALL:AVERage?'))
@@ -282,6 +284,7 @@ class VSA:
             # ACLR measurement
             aclr_start = time()
             self.instr.write('CONF:NR5G:MEAS ACLR')
+            #  self.instr.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV:OFFS {vsa_ch_pwr_offset:.2f}')
             self.instr.write('INIT:IMM;*WAI')
             aclr_list = self.instr.query('CALC:MARK:FUNC:POW:RES? ACP')
             chan_pow, adj_chan_lower, adj_chan_upper = [float(x) for x in aclr_list.split(',')[:3]]
@@ -291,7 +294,6 @@ class VSA:
             print(f"Baseline ACLR time, , {aclr_time:.3f}")
             print("This includes VSA ACLR measurement")
             print(f"Baseline EVM ACLR and Power total time, , , {evm_aclr_power_time:.3f}")
-
 
             # Envelope Tracking if enabled
             print(f"\n------ Begin Baseline EVM ET  ------")
@@ -356,8 +358,9 @@ class VSA:
                 use_power_servo, use_k18_power_servo
             )
             poly_dpd_current_output = current_output
-            print(f"DEBUG: poly_dpd_current_output after _run_servos: {poly_dpd_current_output:.3f}")
+            #  print(f"DEBUG: poly_dpd_current_output after _run_servos: {poly_dpd_current_output:.3f}")
             poly_power_servo_time = time() - poly_power_servo_start
+
 
             #  print(f"use nrx {use_power_servo}\nuse K18 {use_k18_power_servo}\nservo iterations {poly_servo_loops}\n")
             #  print(f"Polynomial DPD power servo loop time, , {poly_power_servo_time:.3f}")

@@ -58,11 +58,12 @@ class ET:
             step: Delay increment step in seconds
 
         Returns:
-            tuple: (delays, evms, step_times, et_total_loop_time)
-                - delays: list of delay values tested
-                - evms: list of EVM measurements for each delay
-                - step_times: list of time taken for each step
-                - et_total_loop_time: total time for entire sweep
+            dict: {
+                "avg_evm": Average EVM (dB) across all delay steps
+                "avg_loop_time": Average time per loop (s)
+                "total_time": Total time for entire sweep (s)
+                "num_loops": Number of delay steps performed
+            }
 
         Disables ET after the sweep.
         """
@@ -105,14 +106,12 @@ class ET:
             avg_evm_time = total_evm_time / num_loops if num_loops > 0 else 0
             avg_evm = sum(evms) / num_loops if num_loops > 0 else 0
 
-            #  print("ET total loop time, , {:.3f}".format(et_total_loop_time))
-
             print(
                 f"\nET Iteration Total time, , ,{et_total_loop_time:.3f}\nNumber of loops,{num_loops}\n"
                 f"Average loop time,{avg_loop_time:.3f}s\nAverage get_evm time,{avg_evm_time:.3f}s\n"
                 f"Average EVM,{avg_evm:.2f}dB"
             )
-            print ("this includes time to set delay trigger VSA and get EVM measurement")
+            print("this includes time to set delay trigger VSA and get EVM measurement")
 
             # Disable ET after sweep
             disable_start = time()
@@ -121,7 +120,12 @@ class ET:
             print(f"ET disable time, , {disable_time:.3f}")
             logger.info(f"ET sweep completed: {len(delays)} points in {et_total_loop_time:.3f}s")
 
-            return delays, evms, step_times, et_total_loop_time
+            return {
+                "avg_evm": round(avg_evm, 2),
+                "avg_loop_time": round(avg_loop_time, 3),
+                "total_time": round(et_total_loop_time, 3),
+                "num_loops": num_loops
+            }
 
         except Exception as e:
             logger.error(f"ET delay EVM sweep failed: {str(e)}")
