@@ -126,16 +126,21 @@ class PowerServo:
 
         try:
             self.vsa.instr.query('INST:SEL "Amplifier"; *OPC?')
-            self.vsa.instr.query('CONF:GEN:CONN:STAT ON; *OPC?')
-            self.vsa.instr.query('CONF:GEN:CONT:STAT ON; *OPC?')
-            self.vsa.instr.query('CONF:GEN:POW:LEV:STAT ON; *OPC?')
-            self.vsa.instr.query(f'CONF:GEN:POW:LEV:TARG {target_output:.2f}; *OPC?')
-            self.vsa.instr.query(f'CONF:GEN:POW:LEV:ITER {servo_iterations}; *OPC?')
-            self.vsa.instr.query(f'CONF:GEN:POW:LEV:TOL {tolerance:.2f}; *OPC?')
-            self.vsa.instr.query('CONF:GEN:POW:LEV:STAR; *OPC?')
+            #  self.vsa.instr.query('CONF:GEN:CONN:STAT ON; *OPC?')
+            #  self.vsa.instr.query('CONF:GEN:CONT:STAT ON; *OPC?')
+            #  self.vsa.instr.query('CONF:GEN:POW:LEV:STAT ON; *OPC?')
+            self.vsa.instr.query(':SENS:PSER:STAT ON; *OPC?')
+            self.vsa.instr.query(f':SENS:PSER:TARG:TOL {tolerance:.2f}; *OPC?')
+            self.vsa.instr.query(f':SENS:PSER:TARG:VAL {target_output:.2f}; *OPC?')
+            self.vsa.instr.query(f':SENS:PSER:MAX:ITER {servo_iterations}; *OPC?')
+            self.vsa.instr.query(':SENS:PSER:GLC RFL; *OPC?')
+            self.vsa.instr.query(':SENS:PSER:STAR; *OPC?')
+            self.vsa.instr.query(':INIT:IMM; *OPC?')
 
             k18_time = time() - k18_start
             print(f"K18 servo time, , {k18_time:.3f}")
+            current_output = self.vsa.instr.query(':FETCh:POWer:OUTPut:CURRent:RES?; *OPC?')
+            #  print(f"DEBUG: Current output after K18 power servo {current_output:.3f}")
             self.logger.info(f"K18 servo completed in {k18_time:.3f}s (target={target_output} dBm)")
 
             # Switch back to 5G NR app

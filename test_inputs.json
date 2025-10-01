@@ -2,17 +2,17 @@
   "Sweep_Measurement": {
     "range": {
       "start_ghz": 2.0,
-      "stop_ghz": 2.0,
+      "stop_ghz": 6.0,
       "step_mhz": 100,
       "power_dbm": 6.0,
       "tolerence_db": 0.1,
       "expected_gain_db": 18.0,
       "ddpd_iterations": 5,
       "servo_iterations": 15,
-      "use_power_servo": true,
-      "use_K18_power_servo": false
+      "use_power_servo": false,
+      "use_K18_power_servo": true
     },
-    "user_comment_mode": "first_slot_nrx",
+    "user_comment_mode": "first_slot_k18",
     "signal_bandwidth": "10MHz",
     "frame_type": "first_slot",
     "enable_polynomial_dpd": true,

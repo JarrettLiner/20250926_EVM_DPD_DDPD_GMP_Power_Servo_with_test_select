@@ -103,6 +103,7 @@ class VSA:
             self.instr.query(
                 f':SENS:SWE:TIME {0.0101}; *OPC?')  # Set sweep time to minimum (10.1ms) to speed up measurements
             self.instr.query(':SENS:ADJ:EVM ;*OPC?')
+            self.instr.query(':INP:ATT 26; *OPC?')
             self.instr.query('INIT:CONT OFF; *OPC?')  # Single trigger mode
             self.instr.query('INIT:IMM; *OPC?')  # Trigger single measurement
 
@@ -114,7 +115,7 @@ class VSA:
             #  self.instr.query(f'CONF:GEN:LEV:DUTL {15}')
             self.instr.query(':CONF:REFS:CGW:READ; *OPC?')
             self.instr.query(':CONF:DDPD:STAT OFF; *OPC?')
-            self.instr.query(':SENS:ADJ:LEV; *OPC?')
+            #  self.instr.query(':SENS:ADJ:LEV; *OPC?')
             self.instr.query('INIT:CONT OFF; *OPC?')  # Single trigger mode
             self.instr.query('INIT:IMM; *OPC?')  # Trigger single measurement
             self.instr.query('CONF:DPD:METH GEN; *OPC?')
@@ -201,21 +202,23 @@ class VSA:
         k18_time = 0
         current_output = None
 
-        #  print(f"DEBUG: use_power_servo: {use_power_servo}, use_k18_power_servo: {use_k18_power_servo}")
+        print(f"DEBUG: use_power_servo: {use_power_servo}, use_k18_power_servo: {use_k18_power_servo}")
         if use_power_servo:
             result = power_servo.external_servo(freq_ghz, target_output, expected_gain, servo_iterations)
-            #  print(f"DEBUG: Raw result from external_servo: {result}")
             servo_loops, ext_servo_time, current_output = result
-            #  print(f"DEBUG: current_output after external_servo: {current_output:.3f}")
-            # Verify instrument state
             _, new_output = power_servo.pm.measure()
-            #  print(f"DEBUG: New PM measurement after external_servo: {new_output:.3f}")
-        if use_k18_power_servo:
-            #  print("DEBUG: Running K18 servo")
-            # Handle K18 servo (update with actual logic if needed)
-            k18_time = 0  # Placeholder
+            print(f"DEBUG: New PM measurement after external_servo: {new_output:.3f}")
 
-        #  print(f"DEBUG: Returning current_output from _run_servos: {current_output:.3f}")
+        if use_k18_power_servo:
+            # Call k18_servo with correct arguments
+            result = power_servo.k18_servo(target_output, servo_iterations)
+            servo_loops, k18_time = result
+            # Measure current_output to maintain consistency
+            _, current_output = power_servo.pm.measure()  # Use power meter to get output power after K18 servo
+            print(f"DEBUG: New PM measurement after k18_servo: {current_output:.3f}")
+
+        #  print(
+            #  f"DEBUG: Returning current_output from _run_servos: {current_output:.3f if current_output is not None else 'None'}")
         return servo_loops, ext_servo_time, k18_time, current_output
 
     def _perform_et_sweep(self, et):
